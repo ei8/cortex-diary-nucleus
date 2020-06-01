@@ -5,16 +5,13 @@ EXPOSE 80
 FROM microsoft/dotnet:2.0-sdk AS build
 WORKDIR /src
 COPY *.sln ./
-COPY main/Port.Adapter/Out/Api/Out.Api.csproj main/Port.Adapter/Out/Api/
-COPY main/Application/Application.csproj main/Application/
-COPY main/Domain.Model/Domain.Model.csproj main/Domain.Model/
-RUN dotnet restore
 COPY . .
+RUN dotnet restore ei8-Cortex-Diary-Nucleus-Master.sln
 WORKDIR /src/main/Port.Adapter/Out/Api
 RUN dotnet build -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish -c Release -o /app
+RUN dotnet publish -c Release -o /app /property:PublishWithAspNetCoreTargetManifest=false
 
 FROM base AS final
 WORKDIR /app

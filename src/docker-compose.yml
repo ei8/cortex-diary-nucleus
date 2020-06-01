@@ -4,11 +4,10 @@ services:
   cortex-diary-nucleus.in.api:
     image: ei8works/cortex.diary.nucleus.in.api:0.1.3
     build:
-      context: ./main/Port.Adapter/In/Api/
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./main/Port.Adapter/In/Api/Dockerfile
   cortex-diary-nucleus.out.api:
     image: ei8works/cortex.diary.nucleus.out.api:0.1.3
     build:
-      context: ./main/Port.Adapter/Out/Api/
-      dockerfile: Dockerfile
-
+      context: .
+      dockerfile: ./main/Port.Adapter/Out/Api/Dockerfile
