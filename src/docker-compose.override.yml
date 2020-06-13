@@ -7,11 +7,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - 192.168.8.131:60020:80
+      - 192.168.8.131:60011:80
   cortex-diary-nucleus.out.api:
     env_file: 
       - ./var1.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - 192.168.8.131:60021:80
+      - 192.168.8.131:60012:80
