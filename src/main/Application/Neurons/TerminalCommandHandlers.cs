@@ -1,7 +1,10 @@
 ﻿using CQRSlite.Commands;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands;
+using ei8.Cortex.Graph.Client;
+using ei8.Cortex.IdentityAccess.Client.Out;
 using neurUL.Common.Domain.Model;
 using neurUL.Cortex.Client.In;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,14 +15,20 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         ICancellableCommandHandler<DeactivateTerminal>
     {
         private readonly ITerminalClient terminalClient;
+        private readonly IValidationClient validationClient;
+        private readonly INeuronGraphQueryClient neuronGraphQueryClient;
         private readonly ISettingsService settingsService;
 
-        public TerminalCommandHandlers(ITerminalClient terminalClient, ISettingsService settingsService)
+        public TerminalCommandHandlers(ITerminalClient terminalClient, IValidationClient validationClient, INeuronGraphQueryClient neuronGraphQueryClient, ISettingsService settingsService)
         {
             AssertionConcern.AssertArgumentNotNull(terminalClient, nameof(terminalClient));
+            AssertionConcern.AssertArgumentNotNull(validationClient, nameof(validationClient));
+            AssertionConcern.AssertArgumentNotNull(neuronGraphQueryClient, nameof(neuronGraphQueryClient));
             AssertionConcern.AssertArgumentNotNull(settingsService, nameof(settingsService));
 
             this.terminalClient = terminalClient;
+            this.validationClient = validationClient;
+            this.neuronGraphQueryClient = neuronGraphQueryClient;
             this.settingsService = settingsService;
         }
 
@@ -27,15 +36,23 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         {
             AssertionConcern.AssertArgumentNotNull(message, nameof(message));
 
-            await this.terminalClient.CreateTerminal(
-                this.settingsService.CortexInBaseUrl + "/",
-                message.Id.ToString(),
-                message.PresynapticNeuronId.ToString(),
-                message.PostsynapticNeuronId.ToString(),
-                message.Effect,
-                message.Strength,
-                message.AuthorId.ToString(),
-                token
+            // validate
+            var validationResult = await this.validationClient.UpdateNeuron(
+                this.settingsService.IdentityAccessOutBaseUrl + "/",
+                message.PresynapticNeuronId,
+                message.SubjectId,
+                token);
+
+            if (!validationResult.HasErrors)
+                await this.terminalClient.CreateTerminal(
+                    this.settingsService.CortexInBaseUrl + "/",
+                    message.Id.ToString(),
+                    message.PresynapticNeuronId.ToString(),
+                    message.PostsynapticNeuronId.ToString(),
+                    message.Effect,
+                    message.Strength,
+                    validationResult.UserNeuronId.ToString(),
+                    token
                 );
         }
 
@@ -43,12 +60,26 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         {
             AssertionConcern.AssertArgumentNotNull(message, nameof(message));
 
-            await this.terminalClient.DeactivateTerminal(
-                this.settingsService.CortexInBaseUrl + "/",
-                message.Id.ToString(),
-                message.ExpectedVersion,
-                message.AuthorId.ToString(),
+            var terminal = await this.neuronGraphQueryClient.GetTerminalById(
+                this.settingsService.CortexGraphOutBaseUrl + "/", 
+                message.Id.ToString(), 
                 token
+                );
+
+            // validate
+            var validationResult = await this.validationClient.UpdateNeuron(
+                this.settingsService.IdentityAccessOutBaseUrl + "/",
+                Guid.Parse(terminal.PresynapticNeuronId),
+                message.SubjectId,
+                token);
+
+            if (!validationResult.HasErrors)
+                await this.terminalClient.DeactivateTerminal(
+                    this.settingsService.CortexInBaseUrl + "/",
+                    message.Id.ToString(),
+                    message.ExpectedVersion,
+                    validationResult.UserNeuronId.ToString(),
+                    token
                 );
         }
     }

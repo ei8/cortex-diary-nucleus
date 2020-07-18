@@ -1,17 +1,17 @@
 version: '3.4'
 
 services:
-  cortex-diary-nucleus.in.api:
+  cortex.diary.nucleus.in.api:
     env_file:
       - ./var1.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    ports:
-      - 192.168.8.131:60011:80
-  cortex-diary-nucleus.out.api:
+  cortex.diary.nucleus.out.api:
     env_file: 
       - ./var1.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    ports:
-      - 192.168.8.131:60012:80
+networks:
+    default:
+        external:
+            name: sample_default

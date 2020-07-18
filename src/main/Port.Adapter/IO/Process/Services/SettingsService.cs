@@ -21,5 +21,9 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.IO.Process.Services
         public string AggregateInBaseUrl => Environment.GetEnvironmentVariable(EnvironmentVariableKeys.AggregateInBaseUrl);
 
         public string AggregateOutBaseUrl => Environment.GetEnvironmentVariable(EnvironmentVariableKeys.AggregateOutBaseUrl);
+
+        public string IdentityAccessInBaseUrl => Environment.GetEnvironmentVariable(EnvironmentVariableKeys.IdentityAccessInBaseUrl);
+
+        public string IdentityAccessOutBaseUrl => Environment.GetEnvironmentVariable(EnvironmentVariableKeys.IdentityAccessOutBaseUrl);
     }
 }

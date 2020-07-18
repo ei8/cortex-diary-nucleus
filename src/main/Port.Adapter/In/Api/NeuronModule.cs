@@ -25,13 +25,13 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                                 Guid.Parse(bodyAsObject.Id.ToString()),
                                 bodyAsObject.Tag.ToString(),
                                 Guid.Parse(bodyAsObject.RegionId.ToString()),
-                                Guid.Parse(bodyAsObject.AuthorId.ToString())
+                                Guid.Parse(bodyAsObject.SubjectId.ToString())
                                 );                            
                         },
                         "Id",
                         "Tag",
                         "RegionId",
-                        "AuthorId"
+                        "SubjectId"
                     );
             }
             );
@@ -46,12 +46,12 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                             return new ChangeNeuronTag(
                                 Guid.Parse(parameters.neuronId),
                                 bodyAsObject.Tag.ToString(),
-                                Guid.Parse(bodyAsObject.AuthorId.ToString()),
+                                Guid.Parse(bodyAsObject.SubjectId.ToString()),
                                 expectedVersion
                                 );
                         },
                         "Tag",
-                        "AuthorId"
+                        "SubjectId"
                     );
             }
             );
@@ -65,11 +65,11 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         {
                             return new DeactivateNeuron(
                                 Guid.Parse(parameters.neuronId),
-                                Guid.Parse(bodyAsObject.AuthorId.ToString()),
+                                Guid.Parse(bodyAsObject.SubjectId.ToString()),
                                 expectedVersion
                                 );
                         },
-                        "AuthorId"
+                        "SubjectId"
                     );
             }
             );

@@ -14,5 +14,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application
         string TagOutBaseUrl { get; }
         string AggregateInBaseUrl { get; }
         string AggregateOutBaseUrl { get; }
+        string IdentityAccessInBaseUrl { get; }
+        string IdentityAccessOutBaseUrl { get; }
     }
 }

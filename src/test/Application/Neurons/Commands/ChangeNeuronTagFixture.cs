@@ -117,7 +117,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Test.Neurons.Commands.ChangeNeuro
         [Fact]
         public void Then_should_have_correct_author_id()
         {
-            Assert.Equal(this.AuthorId, this.sut.AuthorId);
+            Assert.Equal(this.AuthorId, this.sut.SubjectId);
         }
 
         [Fact]
