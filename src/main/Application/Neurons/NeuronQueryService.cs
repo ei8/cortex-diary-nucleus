@@ -1,13 +1,10 @@
-﻿using neurUL.Common.Domain.Model;
-using neurUL.Common.Http;
+﻿using ei8.Cortex.Diary.Common;
+using ei8.Cortex.Graph.Client;
+using neurUL.Common.Domain.Model;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ei8.Cortex.Diary.Common;
-using ei8.Cortex.Graph.Client;
-using ei8.Cortex.Diary.Nucleus.Application;
 
 namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 {

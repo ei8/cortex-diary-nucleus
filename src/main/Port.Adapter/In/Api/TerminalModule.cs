@@ -21,17 +21,17 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         (bodyAsObject, bodyAsDictionary, expectedVersion) =>
                         {
                             TerminalModule.CreateTerminalFromDynamic(bodyAsObject, out Guid terminalId, out Guid presynapticNeuronId, 
-                                out Guid postsynapticNeuronId, out NeurotransmitterEffect effect, out float strength, out Guid authorId);
+                                out Guid postsynapticNeuronId, out NeurotransmitterEffect effect, out float strength, out Guid subjectId);
 
                             return new CreateTerminal(terminalId, presynapticNeuronId, postsynapticNeuronId, 
-                                effect, strength, authorId);
+                                effect, strength, subjectId);
                         },
                         "Id",
                         "PresynapticNeuronId",
                         "PostsynapticNeuronId",
                         "Effect",
                         "Strength",
-                        "AuthorId"
+                        "SubjectId"
                     );
             }
             );
@@ -45,18 +45,18 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         {
                             return new DeactivateTerminal(
                                 Guid.Parse(parameters.terminalId),
-                                Guid.Parse(bodyAsObject.AuthorId.ToString()),
+                                Guid.Parse(bodyAsObject.SubjectId.ToString()),
                                 expectedVersion
                                 );
                         },
-                        "AuthorId"
+                        "SubjectId"
                     );
                 }
             );
         }
 
         private static void CreateTerminalFromDynamic(dynamic dynamicTerminal, out Guid terminalId, out Guid presynapticNeuronId, 
-            out Guid postsynapticNeuronId, out NeurotransmitterEffect effect, out float strength, out Guid authorId)
+            out Guid postsynapticNeuronId, out NeurotransmitterEffect effect, out float strength, out Guid subjectId)
         {
             terminalId = Guid.Parse(dynamicTerminal.Id.ToString());
             presynapticNeuronId = Guid.Parse(dynamicTerminal.PresynapticNeuronId.ToString());
@@ -67,7 +67,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             else
                 throw new ArgumentOutOfRangeException("Effect", $"Specified NeurotransmitterEffect value of '{dynamicTerminal.Effect.ToString()}' was invalid");
             strength = float.Parse(dynamicTerminal.Strength.ToString());
-            authorId = Guid.Parse(dynamicTerminal.AuthorId.ToString());
+            subjectId = Guid.Parse(dynamicTerminal.SubjectId.ToString());
         }
     }
 }

@@ -6,7 +6,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
 {
     public class ChangeNeuronTag : ICommand
     {
-        public ChangeNeuronTag(Guid id, string newTag, Guid authorId, int expectedVersion)
+        public ChangeNeuronTag(Guid id, string newTag, Guid subjectId, int expectedVersion)
         {
             AssertionConcern.AssertArgumentValid(
                 g => g != Guid.Empty,
@@ -17,9 +17,9 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
             AssertionConcern.AssertArgumentNotNull(newTag, nameof(newTag));
             AssertionConcern.AssertArgumentValid(
                 g => g != Guid.Empty,
-                authorId,
+                subjectId,
                 Messages.Exception.InvalidId,
-                nameof(authorId)
+                nameof(subjectId)
                 );
             AssertionConcern.AssertArgumentValid(
                 i => i >= 1,
@@ -30,7 +30,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
 
             this.Id = id;            
             this.NewTag = newTag;
-            this.AuthorId = authorId;
+            this.SubjectId = subjectId;
             this.ExpectedVersion = expectedVersion;
         }
 
@@ -38,7 +38,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
 
         public string NewTag { get; private set; }
 
-        public Guid AuthorId { get; private set; }
+        public Guid SubjectId { get; private set; }
 
         public int ExpectedVersion { get; private set; }
     }
