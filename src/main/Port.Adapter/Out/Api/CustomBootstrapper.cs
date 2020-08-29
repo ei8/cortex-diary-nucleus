@@ -10,6 +10,7 @@ using ei8.Cortex.Diary.Nucleus.Port.Adapter.IO.Process.Services;
 using ei8.Cortex.Graph.Client;
 using ei8.EventSourcing.Client;
 using ei8.EventSourcing.Client.Out;
+using ei8.Cortex.IdentityAccess.Client.Out;
 
 namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.Out.Api
 {
@@ -26,6 +27,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.Out.Api
             container.Register<IRequestProvider, RequestProvider>();
             container.Register<ISettingsService, SettingsService>();
             container.Register<INeuronGraphQueryClient, HttpNeuronGraphQueryClient>();
+            container.Register<IValidationClient, HttpValidationClient>();
             container.Register<INeuronQueryService, NeuronQueryService>();
             container.Register<IEventSerializer, EventSerializer>();
             container.Register<INotificationClient, HttpNotificationClient>();

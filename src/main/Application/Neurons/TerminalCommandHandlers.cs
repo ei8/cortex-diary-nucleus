@@ -62,7 +62,8 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
             var terminal = await this.neuronGraphQueryClient.GetTerminalById(
                 this.settingsService.CortexGraphOutBaseUrl + "/", 
-                message.Id.ToString(), 
+                message.Id.ToString(),
+                new Graph.Common.NeuronQuery() { TerminalActiveValues = Graph.Common.ActiveValues.All },
                 token
                 );
 

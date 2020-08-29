@@ -24,35 +24,67 @@ namespace ei8.Cortex.Diary.Nucleus.Application
             result.PresynapticNot = value.PresynapticNot?.ToArray();
             result.TagContains = value.TagContains?.ToArray();
             result.TagContainsNot = value.TagContainsNot?.ToArray();
+
+            result.RelativeValues = Extensions.ConvertNullableEnumToExternal<Diary.Common.RelativeValues, Graph.Common.RelativeValues>(
+                value.RelativeValues, 
+                v => ((int)v).ToString()
+                );
+
+            result.NeuronActiveValues = Extensions.ConvertNullableEnumToExternal<Diary.Common.ActiveValues, Graph.Common.ActiveValues>(
+                value.NeuronActiveValues,
+                v => ((int)v).ToString()
+                );
+
+            result.TerminalActiveValues = Extensions.ConvertNullableEnumToExternal<Diary.Common.ActiveValues, Graph.Common.ActiveValues>(
+                value.TerminalActiveValues,
+                v => ((int)v).ToString()
+                );
+
+            result.Limit = value.Limit;
+
             return result;
         }
 
-        internal static IEnumerable<Neuron> ToInternalType(this IEnumerable<Graph.Common.Neuron> value)
+        private static TNew? ConvertNullableEnumToExternal<TOrig, TNew>(TOrig? original, Func<TOrig?, string> evaluator) 
+            where TOrig : struct 
+            where TNew : struct
         {
-            return value.Select(cn => new Neuron()
+            TNew? r = null;
+            if (original.HasValue)
+                r = (TNew)Enum.Parse(
+                    typeof(TNew),
+                    evaluator(original.Value)
+                    );
+            return r;
+        }
+
+        internal static Neuron ToInternalType(this Graph.Common.Neuron value)
+        {
+            return new Neuron()
             {
-                Id = cn.Id,
-                Tag = cn.Tag,
-                Terminal = cn.Terminal != null ? new Terminal()
+                Id = value.Id,
+                Tag = value.Tag,
+                Terminal = value.Terminal != null ? new Terminal()
                 {
-                    AuthorId = cn.Terminal.AuthorId,
-                    AuthorTag = cn.Terminal.AuthorTag,
-                    Effect = cn.Terminal.Effect,
-                    Id = cn.Terminal.Id,
-                    PostsynapticNeuronId = cn.Terminal.PostsynapticNeuronId,
-                    PresynapticNeuronId = cn.Terminal.PresynapticNeuronId,
-                    Strength = cn.Terminal.Strength,
-                    Timestamp = cn.Terminal.Timestamp,
-                    Version = cn.Terminal.Version
+                    AuthorId = value.Terminal.AuthorId,
+                    AuthorTag = value.Terminal.AuthorTag,
+                    Effect = value.Terminal.Effect,
+                    Id = value.Terminal.Id,
+                    PostsynapticNeuronId = value.Terminal.PostsynapticNeuronId,
+                    PresynapticNeuronId = value.Terminal.PresynapticNeuronId,
+                    Strength = value.Terminal.Strength,
+                    Timestamp = value.Terminal.Timestamp,
+                    Version = value.Terminal.Version,
+                    Active = value.Terminal.Active
                 } : null,
-                Version = cn.Version,
-                AuthorId = cn.AuthorId,
-                AuthorTag = cn.AuthorTag,
-                RegionId = cn.RegionId,
-                RegionTag = cn.RegionTag,
-                Timestamp = cn.Timestamp,
-                Errors = cn.Errors
-            });
+                Version = value.Version,
+                AuthorId = value.AuthorId,
+                AuthorTag = value.AuthorTag,
+                RegionId = value.RegionId,
+                RegionTag = value.RegionTag,
+                Timestamp = value.Timestamp,
+                Active = value.Active
+            };
         }
 
         internal static NotificationLog ToInternalType(this EventSourcing.Common.NotificationLog value)
