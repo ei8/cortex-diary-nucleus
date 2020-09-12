@@ -26,9 +26,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.Out.Api
 
             container.Register<IRequestProvider, RequestProvider>();
             container.Register<ISettingsService, SettingsService>();
-            container.Register<INeuronGraphQueryClient, HttpNeuronGraphQueryClient>();
             container.Register<IValidationClient, HttpValidationClient>();
-            container.Register<INeuronQueryService, NeuronQueryService>();
             container.Register<IEventSerializer, EventSerializer>();
             container.Register<INotificationClient, HttpNotificationClient>();
             container.Register<INotificationApplicationService, NotificationApplicationService>();
