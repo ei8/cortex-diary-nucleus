@@ -21,16 +21,21 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         false,
                         (bodyAsObject, bodyAsDictionary, expectedVersion) =>
                         {
+                            Guid? regionId = null;
+
+                            if (bodyAsDictionary.ContainsKey("RegionId"))
+                                if (Guid.TryParse(bodyAsObject.RegionId.ToString(), out Guid tempRegionId))
+                                    regionId = tempRegionId;
+
                             return new CreateNeuron(
                                 Guid.Parse(bodyAsObject.Id.ToString()),
                                 bodyAsObject.Tag.ToString(),
-                                Guid.Parse(bodyAsObject.RegionId.ToString()),
+                                regionId,
                                 Guid.Parse(bodyAsObject.SubjectId.ToString())
                                 );                            
                         },
                         "Id",
-                        "Tag",
-                        "RegionId",
+                        "Tag",                        
                         "SubjectId"
                     );
             }
