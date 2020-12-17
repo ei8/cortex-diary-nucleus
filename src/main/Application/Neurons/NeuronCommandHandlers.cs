@@ -70,7 +70,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                     validationResult.UserNeuronId.ToString(),
                     token
                     );
-                if (message.RegionId != Guid.Empty)
+                if (message.RegionId.HasValue)
                 {
                     // increment expected
                     expectedVersion++;
