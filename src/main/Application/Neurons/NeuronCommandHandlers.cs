@@ -46,7 +46,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                 this.settingsService.IdentityAccessOutBaseUrl + "/",
                 message.Id,
                 message.RegionId,
-                message.SubjectId,
+                message.UserId,
                 token);
 
             if (!validationResult.HasErrors)
@@ -95,7 +95,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             var validationResult = await this.validationClient.UpdateNeuron(
                 this.settingsService.IdentityAccessOutBaseUrl + "/",
                 message.Id,
-                message.SubjectId,
+                message.UserId,
                 token);
 
             if (!validationResult.HasErrors)
@@ -117,7 +117,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             var validationResult = await this.validationClient.UpdateNeuron(
                 this.settingsService.IdentityAccessOutBaseUrl + "/",
                 message.Id,
-                message.SubjectId,
+                message.UserId,
                 token);
 
             if (!validationResult.HasErrors)

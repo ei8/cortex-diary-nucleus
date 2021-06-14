@@ -31,12 +31,12 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                                 Guid.Parse(bodyAsObject.Id.ToString()),
                                 bodyAsObject.Tag.ToString(),
                                 regionId,
-                                Guid.Parse(bodyAsObject.SubjectId.ToString())
+                                bodyAsObject.UserId.ToString()
                                 );                            
                         },
                         "Id",
                         "Tag",                        
-                        "SubjectId"
+                        "UserId"
                     );
             }
             );
@@ -51,12 +51,12 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                             return new ChangeNeuronTag(
                                 Guid.Parse(parameters.neuronId),
                                 bodyAsObject.Tag.ToString(),
-                                Guid.Parse(bodyAsObject.SubjectId.ToString()),
+                                bodyAsObject.UserId.ToString(),
                                 expectedVersion
                                 );
                         },
                         "Tag",
-                        "SubjectId"
+                        "UserId"
                     );
             }
             );
@@ -70,11 +70,11 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         {
                             return new DeactivateNeuron(
                                 Guid.Parse(parameters.neuronId),
-                                Guid.Parse(bodyAsObject.SubjectId.ToString()),
+                                bodyAsObject.UserId.ToString(),
                                 expectedVersion
                                 );
                         },
-                        "SubjectId"
+                        "UserId"
                     );
             }
             );

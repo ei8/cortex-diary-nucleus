@@ -7,7 +7,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
 {
     public class CreateTerminal : ICommand
     {
-        public CreateTerminal(Guid id, Guid presynapticNeuronId, Guid postsynapticNeuronId, NeurotransmitterEffect effect, float strength, Guid subjectId)
+        public CreateTerminal(Guid id, Guid presynapticNeuronId, Guid postsynapticNeuronId, NeurotransmitterEffect effect, float strength, string userId)
         {
             AssertionConcern.AssertArgumentValid(
                 g => g != Guid.Empty,
@@ -27,11 +27,10 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
                 Messages.Exception.InvalidId,
                 nameof(postsynapticNeuronId)
                 );
-            AssertionConcern.AssertArgumentValid(
-                g => g != Guid.Empty,
-                subjectId,
-                Messages.Exception.InvalidId,
-                nameof(subjectId)
+            AssertionConcern.AssertArgumentNotEmpty(
+                userId,
+                Messages.Exception.InvalidUserId,
+                nameof(userId)
                 );
 
             this.Id = id;
@@ -39,7 +38,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
             this.PostsynapticNeuronId = postsynapticNeuronId;
             this.Effect = effect;
             this.Strength = strength;
-            this.SubjectId = subjectId;
+            this.UserId = userId;
         }
 
         public Guid Id { get; private set; }
@@ -52,7 +51,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
 
         public float Strength { get; private set; }
 
-        public Guid SubjectId { get; private set; }
+        public string UserId { get; private set; }
 
         public int ExpectedVersion { get; private set; }
     }

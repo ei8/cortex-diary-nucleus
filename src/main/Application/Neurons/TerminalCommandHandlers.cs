@@ -40,7 +40,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             var validationResult = await this.validationClient.UpdateNeuron(
                 this.settingsService.IdentityAccessOutBaseUrl + "/",
                 message.PresynapticNeuronId,
-                message.SubjectId,
+                message.UserId,
                 token);
 
             if (!validationResult.HasErrors)
@@ -71,7 +71,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             var validationResult = await this.validationClient.UpdateNeuron(
                 this.settingsService.IdentityAccessOutBaseUrl + "/",
                 Guid.Parse(terminal.PresynapticNeuronId),
-                message.SubjectId,
+                message.UserId,
                 token);
 
             if (!validationResult.HasErrors)

@@ -7,7 +7,7 @@ WORKDIR /src
 COPY *.sln ./
 COPY . .
 WORKDIR /src/main/Port.Adapter/Out/Api
-RUN dotnet build -c Release -o /app
+RUN dotnet build -c Release -o /app --disable-parallel
 
 FROM build AS publish
 RUN dotnet publish -c Release -o /app /property:PublishWithAspNetCoreTargetManifest=false

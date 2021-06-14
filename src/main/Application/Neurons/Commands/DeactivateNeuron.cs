@@ -6,7 +6,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
 {
     public class DeactivateNeuron : ICommand
     {
-        public DeactivateNeuron(Guid id, Guid subjectId, int expectedVersion)
+        public DeactivateNeuron(Guid id, string userId, int expectedVersion)
         {
             AssertionConcern.AssertArgumentValid(
                 g => g != Guid.Empty,
@@ -14,11 +14,10 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
                 Messages.Exception.InvalidId,
                 nameof(id)
                 );
-            AssertionConcern.AssertArgumentValid(
-                g => g != Guid.Empty,
-                subjectId,
-                Messages.Exception.InvalidId,
-                nameof(subjectId)
+            AssertionConcern.AssertArgumentNotEmpty(
+                userId,
+                Messages.Exception.InvalidUserId,
+                nameof(userId)
                 );
             AssertionConcern.AssertArgumentValid(
                 i => i >= 1,
@@ -28,13 +27,13 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
                 );
 
             this.Id = id;
-            this.SubjectId = subjectId;            
+            this.UserId = userId;            
             this.ExpectedVersion = expectedVersion;
         }
 
         public Guid Id { get; private set; }
 
-        public Guid SubjectId { get; private set; }
+        public string UserId { get; private set; }
 
         public int ExpectedVersion { get; private set; }
     }
