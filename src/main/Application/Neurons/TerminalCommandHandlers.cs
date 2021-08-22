@@ -2,6 +2,7 @@
 using ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands;
 using ei8.Cortex.Graph.Client;
 using ei8.Cortex.IdentityAccess.Client.Out;
+using ei8.Data.ExternalReference.Client.In;
 using neurUL.Common.Domain.Model;
 using neurUL.Cortex.Client.In;
 using System;
@@ -15,18 +16,21 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         ICancellableCommandHandler<DeactivateTerminal>
     {
         private readonly ITerminalClient terminalClient;
+        private readonly IExternalReferenceClient externalReferenceClient;
         private readonly IValidationClient validationClient;
         private readonly INeuronGraphQueryClient neuronGraphQueryClient;
         private readonly ISettingsService settingsService;
 
-        public TerminalCommandHandlers(ITerminalClient terminalClient, IValidationClient validationClient, INeuronGraphQueryClient neuronGraphQueryClient, ISettingsService settingsService)
+        public TerminalCommandHandlers(ITerminalClient terminalClient, IExternalReferenceClient externalReferenceClient, IValidationClient validationClient, INeuronGraphQueryClient neuronGraphQueryClient, ISettingsService settingsService)
         {
             AssertionConcern.AssertArgumentNotNull(terminalClient, nameof(terminalClient));
+            AssertionConcern.AssertArgumentNotNull(externalReferenceClient, nameof(externalReferenceClient));
             AssertionConcern.AssertArgumentNotNull(validationClient, nameof(validationClient));
             AssertionConcern.AssertArgumentNotNull(neuronGraphQueryClient, nameof(neuronGraphQueryClient));
             AssertionConcern.AssertArgumentNotNull(settingsService, nameof(settingsService));
 
             this.terminalClient = terminalClient;
+            this.externalReferenceClient = externalReferenceClient;
             this.validationClient = validationClient;
             this.neuronGraphQueryClient = neuronGraphQueryClient;
             this.settingsService = settingsService;
@@ -44,6 +48,8 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                 token);
 
             if (!validationResult.HasErrors)
+            {
+                int expectedVersion = 0;
                 await this.terminalClient.CreateTerminal(
                     this.settingsService.CortexInBaseUrl + "/",
                     message.Id.ToString(),
@@ -54,6 +60,20 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                     validationResult.UserNeuronId.ToString(),
                     token
                 );
+
+                if (!string.IsNullOrWhiteSpace(message.Url))
+                {
+                    expectedVersion++;
+                    await this.externalReferenceClient.ChangeUrl(
+                        this.settingsService.ExternalReferenceInBaseUrl + "/",
+                        message.Id.ToString(),
+                        message.Url,
+                        expectedVersion,
+                        validationResult.UserNeuronId.ToString(),
+                        token
+                        );
+                }
+            }
         }
 
         public async Task Handle(DeactivateTerminal message, CancellationToken token = default(CancellationToken))

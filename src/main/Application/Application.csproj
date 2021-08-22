@@ -13,6 +13,7 @@
     <PackageReference Include="ei8.Cortex.IdentityAccess.Client" Version="0.1.12" />
     <PackageReference Include="ei8.Data.Aggregate.Client" Version="0.1.2" />
     <PackageReference Include="ei8.Data.Tag.Client" Version="0.1.4" />
+    <PackageReference Include="ei8.Data.ExternalReference.Client" Version="0.1.0" />
     <PackageReference Include="ei8.EventSourcing.Client" Version="0.1.19" />
     <PackageReference Include="Neurul.Common" Version="0.1.19" />
     <PackageReference Include="Neurul.Cortex.Client" Version="0.1.14" />

@@ -12,6 +12,7 @@ using ei8.Data.Aggregate.Client.In;
 using ei8.Data.Tag.Client.In;
 using ei8.Cortex.IdentityAccess.Client.Out;
 using ei8.Cortex.Graph.Client;
+using ei8.Data.ExternalReference.Client.In;
 
 namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 {
@@ -37,6 +38,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             container.Register<ISettingsService, SettingsService>();
             container.Register<IValidationClient, HttpValidationClient>();
             container.Register<INeuronGraphQueryClient, HttpNeuronGraphQueryClient>();
+            container.Register<IExternalReferenceClient, HttpExternalReferenceClient>();
             container.Register<NeuronCommandHandlers>();
             container.Register<TerminalCommandHandlers>();
 

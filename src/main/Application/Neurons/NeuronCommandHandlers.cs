@@ -1,6 +1,7 @@
 ﻿using CQRSlite.Commands;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands;
 using ei8.Cortex.IdentityAccess.Client.Out;
+using ei8.Data.ExternalReference.Client.In;
 using ei8.Data.Aggregate.Client.In;
 using ei8.Data.Tag.Client.In;
 using neurUL.Common.Domain.Model;
@@ -19,20 +20,23 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         private readonly INeuronClient neuronClient;
         private readonly ITagClient tagClient;
         private readonly IAggregateClient aggregateClient;
+        private readonly IExternalReferenceClient externalReferenceClient;
         private readonly IValidationClient validationClient;
         private readonly ISettingsService settingsService;
 
-        public NeuronCommandHandlers(INeuronClient neuronClient, ITagClient tagClient, IAggregateClient aggregateClient, IValidationClient validationClient, ISettingsService settingsService)
+        public NeuronCommandHandlers(INeuronClient neuronClient, ITagClient tagClient, IAggregateClient aggregateClient, IExternalReferenceClient externalReferenceClient, IValidationClient validationClient, ISettingsService settingsService)
         {
             AssertionConcern.AssertArgumentNotNull(neuronClient, nameof(neuronClient));
             AssertionConcern.AssertArgumentNotNull(tagClient, nameof(tagClient));
             AssertionConcern.AssertArgumentNotNull(aggregateClient, nameof(aggregateClient));
+            AssertionConcern.AssertArgumentNotNull(externalReferenceClient, nameof(externalReferenceClient));
             AssertionConcern.AssertArgumentNotNull(validationClient, nameof(validationClient));
             AssertionConcern.AssertArgumentNotNull(settingsService, nameof(settingsService));
 
             this.neuronClient = neuronClient;
             this.tagClient = tagClient;
             this.aggregateClient = aggregateClient;
+            this.externalReferenceClient = externalReferenceClient;
             this.validationClient = validationClient;
             this.settingsService = settingsService;
         }
@@ -84,6 +88,19 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                         token
                         );
                 }
+                if (!string.IsNullOrWhiteSpace(message.Url))
+                {
+                    // increment expected
+                    expectedVersion++;
+                    await this.externalReferenceClient.ChangeUrl(
+                        this.settingsService.ExternalReferenceInBaseUrl + "/",
+                        message.Id.ToString(),
+                        message.Url,
+                        expectedVersion,
+                        validationResult.UserNeuronId.ToString(),
+                        token
+                        );
+                }
             }
         }
 
@@ -103,6 +120,28 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                     this.settingsService.TagInBaseUrl + "/",
                     message.Id.ToString(),
                     message.NewTag,
+                    message.ExpectedVersion,
+                    validationResult.UserNeuronId.ToString(),
+                    token
+                    );
+        }
+
+        public async Task Handle(ChangeNeuronUrl message, CancellationToken token = default(CancellationToken))
+        {
+            AssertionConcern.AssertArgumentNotNull(message, nameof(message));
+
+            // validate
+            var validationResult = await this.validationClient.UpdateNeuron(
+                this.settingsService.IdentityAccessOutBaseUrl + "/",
+                message.Id,
+                message.UserId,
+                token);
+
+            if (!validationResult.HasErrors)
+                await this.externalReferenceClient.ChangeUrl(
+                    this.settingsService.ExternalReferenceInBaseUrl + "/",
+                    message.Id.ToString(),
+                    message.NewUrl,
                     message.ExpectedVersion,
                     validationResult.UserNeuronId.ToString(),
                     token
