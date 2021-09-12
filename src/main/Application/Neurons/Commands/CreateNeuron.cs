@@ -7,7 +7,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
 {
     public class CreateNeuron : ICommand
     {
-        public CreateNeuron(Guid id, string tag, Guid? regionId, string url, string userId)
+        public CreateNeuron(Guid id, string tag, Guid? regionId, string externalReferenceUrl, string userId)
         {
             AssertionConcern.AssertArgumentValid(
                 g => g != Guid.Empty,
@@ -20,7 +20,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
             this.Id = id;            
             this.Tag = tag;
             this.RegionId = regionId;
-            this.Url = url;
+            this.ExternalReferenceUrl = externalReferenceUrl;
             this.UserId = userId;
         }
 
@@ -30,7 +30,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
 
         public Guid? RegionId { get; private set; }
 
-        public string Url { get; private set; }
+        public string ExternalReferenceUrl { get; private set; }
 
         public string UserId { get; private set; }
 

@@ -88,14 +88,14 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                         token
                         );
                 }
-                if (!string.IsNullOrWhiteSpace(message.Url))
+                if (!string.IsNullOrWhiteSpace(message.ExternalReferenceUrl))
                 {
                     // increment expected
                     expectedVersion++;
                     await this.externalReferenceClient.ChangeUrl(
                         this.settingsService.ExternalReferenceInBaseUrl + "/",
                         message.Id.ToString(),
-                        message.Url,
+                        message.ExternalReferenceUrl,
                         expectedVersion,
                         validationResult.UserNeuronId.ToString(),
                         token
@@ -126,7 +126,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                     );
         }
 
-        public async Task Handle(ChangeNeuronUrl message, CancellationToken token = default(CancellationToken))
+        public async Task Handle(ChangeNeuronExternalReferenceUrl message, CancellationToken token = default(CancellationToken))
         {
             AssertionConcern.AssertArgumentNotNull(message, nameof(message));
 
@@ -141,7 +141,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                 await this.externalReferenceClient.ChangeUrl(
                     this.settingsService.ExternalReferenceInBaseUrl + "/",
                     message.Id.ToString(),
-                    message.NewUrl,
+                    message.NewExternalReferenceUrl,
                     message.ExpectedVersion,
                     validationResult.UserNeuronId.ToString(),
                     token

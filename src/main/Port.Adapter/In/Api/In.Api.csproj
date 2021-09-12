@@ -19,7 +19,7 @@
     <PackageReference Include="Nancy.Serialization.JsonNet" Version="2.0.0-clinteastwood"/>
     <PackageReference Include="Neurul.Cortex.Client" Version="0.1.14"/>
     <PackageReference Include="sqlite-net-pcl" Version="1.5.166-beta"/>
-    <PackageReference Include="neurUL.Common.Api" Version="0.1.0"/>
+    <PackageReference Include="neurUL.Common.Api" Version="0.1.1"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Application\Application.csproj"/>

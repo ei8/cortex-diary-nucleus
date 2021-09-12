@@ -20,11 +20,20 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         false,
                         async (bodyAsObject, bodyAsDictionary, expectedVersion) =>
                         {
-                            TerminalModule.CreateTerminalFromDynamic(bodyAsObject, bodyAsDictionary, out Guid terminalId, out Guid presynapticNeuronId, 
-                                out Guid postsynapticNeuronId, out NeurotransmitterEffect effect, out float strength, out string url, out string userId);
+                            TerminalModule.CreateTerminalFromDynamic(
+                                bodyAsObject, 
+                                bodyAsDictionary, 
+                                out Guid terminalId, 
+                                out Guid presynapticNeuronId, 
+                                out Guid postsynapticNeuronId, 
+                                out NeurotransmitterEffect effect, 
+                                out float strength, 
+                                out string externalReferenceUrl, 
+                                out string userId
+                                );
 
                             await commandSender.Send(new CreateTerminal(terminalId, presynapticNeuronId, postsynapticNeuronId, 
-                                effect, strength, url, userId));
+                                effect, strength, externalReferenceUrl, userId));
                         },
                         NeuronModule.ConcurrencyExceptionSetter,
                         new string[0],
@@ -58,7 +67,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
         }
 
         private static void CreateTerminalFromDynamic(dynamic dynamicTerminal, Dictionary<string, object> bodyAsDictionary, out Guid terminalId, out Guid presynapticNeuronId, 
-            out Guid postsynapticNeuronId, out NeurotransmitterEffect effect, out float strength, out string url, out string userId)
+            out Guid postsynapticNeuronId, out NeurotransmitterEffect effect, out float strength, out string externalReferenceUrl, out string userId)
         {
             terminalId = Guid.Parse(dynamicTerminal.Id.ToString());
             presynapticNeuronId = Guid.Parse(dynamicTerminal.PresynapticNeuronId.ToString());
@@ -69,7 +78,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             else
                 throw new ArgumentOutOfRangeException("Effect", $"Specified NeurotransmitterEffect value of '{dynamicTerminal.Effect.ToString()}' was invalid");
             strength = float.Parse(dynamicTerminal.Strength.ToString());
-            url = bodyAsDictionary.ContainsKey("Url") ? dynamicTerminal.Url.ToString() : null;
+            externalReferenceUrl = bodyAsDictionary.ContainsKey("ExternalReferenceUrl") ? dynamicTerminal.ExternalReferenceUrl.ToString() : null;
             userId = dynamicTerminal.UserId.ToString();
         }
     }

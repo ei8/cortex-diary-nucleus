@@ -4,9 +4,9 @@ using System;
 
 namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
 {
-    public class ChangeNeuronUrl : ICommand
+    public class ChangeNeuronExternalReferenceUrl : ICommand
     {
-        public ChangeNeuronUrl(Guid id, string newUrl, string userId, int expectedVersion)
+        public ChangeNeuronExternalReferenceUrl(Guid id, string newExternalReferenceUrl, string userId, int expectedVersion)
         {
             AssertionConcern.AssertArgumentValid(
                 g => g != Guid.Empty,
@@ -14,7 +14,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
                 Messages.Exception.InvalidId,
                 nameof(id)
                 );
-            AssertionConcern.AssertArgumentNotNull(newUrl, nameof(newUrl));
+            AssertionConcern.AssertArgumentNotNull(newExternalReferenceUrl, nameof(newExternalReferenceUrl));
             AssertionConcern.AssertArgumentNotEmpty(
                 userId,
                 Messages.Exception.InvalidUserId,
@@ -28,14 +28,14 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
                 );
 
             this.Id = id;            
-            this.NewUrl = newUrl;
+            this.NewExternalReferenceUrl = newExternalReferenceUrl;
             this.UserId = userId;
             this.ExpectedVersion = expectedVersion;
         }
 
         public Guid Id { get; private set; }
 
-        public string NewUrl { get; private set; }
+        public string NewExternalReferenceUrl { get; private set; }
 
         public string UserId { get; private set; }
 

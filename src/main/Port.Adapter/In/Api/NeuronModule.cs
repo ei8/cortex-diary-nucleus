@@ -29,21 +29,29 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                                 if (Guid.TryParse(bodyAsObject.RegionId.ToString(), out Guid tempRegionId))
                                     regionId = tempRegionId;
                             
-                            string url = null;
+                            string erurl = null;
 
-                            if (bodyAsDictionary.ContainsKey("Url"))
-                                url = bodyAsObject.Url.ToString();
+                            if (bodyAsDictionary.ContainsKey("ExternalReferenceUrl"))
+                                erurl = bodyAsObject.ExternalReferenceUrl.ToString();
 
                             await commandSender.Send(new CreateNeuron(
                                 Guid.Parse(bodyAsObject.Id.ToString()),
                                 bodyAsObject.Tag.ToString(),
                                 regionId,
-                                url,
+                                erurl,
                                 bodyAsObject.UserId.ToString()
                                 )
                             );                            
                         },
-                        ConcurrencyExceptionSetter,
+                        (ex, hsc) => { 
+                            // TODO:
+                            // log exception in ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api.NeuronModule line 47
+						    // immediately cause calling Polly to fail (handle specific failure http code to signal "it's not worth retrying"?)
+                            HttpStatusCode result = hsc;                   
+                            if (ex is ConcurrencyException)
+                                result = HttpStatusCode.Conflict;                            
+                            return result;
+                        },
                         new string[0],
                         "Id",
                         "Tag",                        
@@ -65,17 +73,17 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                                     bodyAsObject.UserId.ToString(),
                                     expectedVersion
                                     );
-                            else if (bodyAsDictionary.ContainsKey("Url"))
-                                result = new ChangeNeuronUrl(
+                            else if (bodyAsDictionary.ContainsKey("ExternalReferenceUrl"))
+                                result = new ChangeNeuronExternalReferenceUrl(
                                     Guid.Parse(parameters.neuronId),
-                                    bodyAsObject.Url.ToString(),
+                                    bodyAsObject.ExternalReferenceUrl.ToString(),
                                     bodyAsObject.UserId.ToString(),
                                     expectedVersion
                                     );
                             await commandSender.Send(result);
                         },
                         ConcurrencyExceptionSetter,
-                        new string[] { "Tag", "Url" },
+                        new string[] { "Tag", "ExternalReferenceUrl" },
                         "UserId"
                     );
             }

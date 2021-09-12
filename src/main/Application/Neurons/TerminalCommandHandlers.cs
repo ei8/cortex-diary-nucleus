@@ -61,13 +61,13 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                     token
                 );
 
-                if (!string.IsNullOrWhiteSpace(message.Url))
+                if (!string.IsNullOrWhiteSpace(message.ExternalReferenceUrl))
                 {
                     expectedVersion++;
                     await this.externalReferenceClient.ChangeUrl(
                         this.settingsService.ExternalReferenceInBaseUrl + "/",
                         message.Id.ToString(),
-                        message.Url,
+                        message.ExternalReferenceUrl,
                         expectedVersion,
                         validationResult.UserNeuronId.ToString(),
                         token
