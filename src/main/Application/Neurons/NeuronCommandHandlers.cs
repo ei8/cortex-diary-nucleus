@@ -15,6 +15,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
     public class NeuronCommandHandlers : 
         ICancellableCommandHandler<CreateNeuron>,
         ICancellableCommandHandler<ChangeNeuronTag>,
+        ICancellableCommandHandler<ChangeNeuronExternalReferenceUrl>,
         ICancellableCommandHandler<DeactivateNeuron>
     {
         private readonly INeuronClient neuronClient;
