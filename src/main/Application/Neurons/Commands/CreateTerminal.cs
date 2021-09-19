@@ -7,7 +7,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
 {
     public class CreateTerminal : ICommand
     {
-        public CreateTerminal(Guid id, Guid presynapticNeuronId, Guid postsynapticNeuronId, NeurotransmitterEffect effect, float strength, string userId)
+        public CreateTerminal(Guid id, Guid presynapticNeuronId, Guid postsynapticNeuronId, NeurotransmitterEffect effect, float strength, string externalReferenceUrl, string userId)
         {
             AssertionConcern.AssertArgumentValid(
                 g => g != Guid.Empty,
@@ -38,6 +38,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
             this.PostsynapticNeuronId = postsynapticNeuronId;
             this.Effect = effect;
             this.Strength = strength;
+            this.ExternalReferenceUrl = externalReferenceUrl;
             this.UserId = userId;
         }
 
@@ -50,6 +51,8 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
         public NeurotransmitterEffect Effect { get; private set; }
 
         public float Strength { get; private set; }
+
+        public string ExternalReferenceUrl { get; private set; }
 
         public string UserId { get; private set; }
 
