@@ -1,12 +1,12 @@
 ﻿using CQRSlite.Commands;
+using CQRSlite.Events;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands;
 using ei8.Cortex.IdentityAccess.Client.Out;
-using ei8.Data.ExternalReference.Client.In;
-using ei8.Data.Aggregate.Client.In;
-using ei8.Data.Tag.Client.In;
+using ei8.EventSourcing.Client;
 using neurUL.Common.Domain.Model;
-using neurUL.Cortex.Client.In;
-using System;
+using neurUL.Cortex.Domain.Model.Neurons;
+using neurUL.Cortex.Port.Adapter.In.InProcess;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,26 +18,41 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         ICancellableCommandHandler<ChangeNeuronExternalReferenceUrl>,
         ICancellableCommandHandler<DeactivateNeuron>
     {
-        private readonly INeuronClient neuronClient;
-        private readonly ITagClient tagClient;
-        private readonly IAggregateClient aggregateClient;
-        private readonly IExternalReferenceClient externalReferenceClient;
+        private readonly INeuronAdapter neuronAdapter;
+        private readonly IAuthoredEventStore eventStore;
+        private readonly IInMemoryAuthoredEventStore inMemoryEventStore;
+        private readonly ei8.Data.Tag.Port.Adapter.In.InProcess.IItemAdapter tagItemAdapter;
+        private readonly ei8.Data.Aggregate.Port.Adapter.In.InProcess.IItemAdapter aggregateItemAdapter;
+        private readonly ei8.Data.ExternalReference.Port.Adapter.In.InProcess.IItemAdapter externalReferenceAdapter;
         private readonly IValidationClient validationClient;
         private readonly ISettingsService settingsService;
 
-        public NeuronCommandHandlers(INeuronClient neuronClient, ITagClient tagClient, IAggregateClient aggregateClient, IExternalReferenceClient externalReferenceClient, IValidationClient validationClient, ISettingsService settingsService)
+        public NeuronCommandHandlers(
+            IAuthoredEventStore eventStore, 
+            IInMemoryAuthoredEventStore inMemoryEventStore,
+            INeuronAdapter neuronAdapter,
+            ei8.Data.Tag.Port.Adapter.In.InProcess.IItemAdapter tagItemAdapter,
+            ei8.Data.Aggregate.Port.Adapter.In.InProcess.IItemAdapter aggregateItemAdapter,
+            ei8.Data.ExternalReference.Port.Adapter.In.InProcess.IItemAdapter externalReferenceAdapter, 
+            IValidationClient validationClient, 
+            ISettingsService settingsService
+            )
         {
-            AssertionConcern.AssertArgumentNotNull(neuronClient, nameof(neuronClient));
-            AssertionConcern.AssertArgumentNotNull(tagClient, nameof(tagClient));
-            AssertionConcern.AssertArgumentNotNull(aggregateClient, nameof(aggregateClient));
-            AssertionConcern.AssertArgumentNotNull(externalReferenceClient, nameof(externalReferenceClient));
+            AssertionConcern.AssertArgumentNotNull(neuronAdapter, nameof(neuronAdapter));
+            AssertionConcern.AssertArgumentNotNull(eventStore, nameof(eventStore));
+            AssertionConcern.AssertArgumentNotNull(inMemoryEventStore, nameof(inMemoryEventStore));
+            AssertionConcern.AssertArgumentNotNull(tagItemAdapter, nameof(tagItemAdapter));
+            AssertionConcern.AssertArgumentNotNull(aggregateItemAdapter, nameof(aggregateItemAdapter));
+            AssertionConcern.AssertArgumentNotNull(externalReferenceAdapter, nameof(externalReferenceAdapter));
             AssertionConcern.AssertArgumentNotNull(validationClient, nameof(validationClient));
             AssertionConcern.AssertArgumentNotNull(settingsService, nameof(settingsService));
 
-            this.neuronClient = neuronClient;
-            this.tagClient = tagClient;
-            this.aggregateClient = aggregateClient;
-            this.externalReferenceClient = externalReferenceClient;
+            this.neuronAdapter = neuronAdapter;
+            this.eventStore = (IAuthoredEventStore) eventStore;
+            this.inMemoryEventStore = (IInMemoryAuthoredEventStore) inMemoryEventStore;
+            this.tagItemAdapter = tagItemAdapter;
+            this.aggregateItemAdapter = aggregateItemAdapter;
+            this.externalReferenceAdapter = externalReferenceAdapter;
             this.validationClient = validationClient;
             this.settingsService = settingsService;
         }
@@ -57,51 +72,44 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             if (!validationResult.HasErrors)
             {
                 //TODO: transfer all of this to Domain.Model, especially parse of Guid for region/aggregate
-                int expectedVersion = 0;
-                await this.neuronClient.CreateNeuron(
-                    this.settingsService.CortexInBaseUrl + "/",
-                    message.Id.ToString(),
-                    validationResult.UserNeuronId.ToString(),
-                    token
+                var txn = await Transaction.Begin(this.eventStore, this.inMemoryEventStore, message.Id, validationResult.UserNeuronId);
+                await txn.InvokeAdapter(
+                    typeof(NeuronCreated).Assembly,
+                    async (ev) => await this.neuronAdapter.CreateNeuron(message.Id, validationResult.UserNeuronId)
                     );
-                // increment expected
-                expectedVersion++;
                 // assign tag value
-                await this.tagClient.ChangeTag(
-                    this.settingsService.TagInBaseUrl + "/",
-                    message.Id.ToString(),
-                    message.Tag,
-                    expectedVersion,
-                    validationResult.UserNeuronId.ToString(),
-                    token
-                    );
+                await txn.InvokeAdapter(
+                    typeof(ei8.Data.Tag.Domain.Model.TagChanged).Assembly,
+                    async (ev) => await this.tagItemAdapter.ChangeTag(
+                        message.Id,
+                        message.Tag,
+                        validationResult.UserNeuronId,
+                        ev
+                    ));
                 if (message.RegionId.HasValue)
                 {
-                    // increment expected
-                    expectedVersion++;
                     // assign region value to id
-                    await this.aggregateClient.ChangeAggregate(
-                        this.settingsService.AggregateInBaseUrl + "/",
-                        message.Id.ToString(),
-                        message.RegionId.ToString(),
-                        expectedVersion,
-                        validationResult.UserNeuronId.ToString(),
-                        token
-                        );
+                    await txn.InvokeAdapter(
+                        typeof(ei8.Data.Aggregate.Domain.Model.AggregateChanged).Assembly,
+                        async (ev) => await this.aggregateItemAdapter.ChangeAggregate(
+                            message.Id,
+                            message.RegionId.ToString(),
+                            validationResult.UserNeuronId,
+                            ev
+                        ));
                 }
                 if (!string.IsNullOrWhiteSpace(message.ExternalReferenceUrl))
                 {
-                    // increment expected
-                    expectedVersion++;
-                    await this.externalReferenceClient.ChangeUrl(
-                        this.settingsService.ExternalReferenceInBaseUrl + "/",
-                        message.Id.ToString(),
-                        message.ExternalReferenceUrl,
-                        expectedVersion,
-                        validationResult.UserNeuronId.ToString(),
-                        token
-                        );
+                    await txn.InvokeAdapter(
+                        typeof(ei8.Data.ExternalReference.Domain.Model.UrlChanged).Assembly,
+                        async (ev) => await this.externalReferenceAdapter.ChangeUrl(
+                            message.Id,
+                            message.ExternalReferenceUrl,
+                            validationResult.UserNeuronId,
+                            ev
+                        ));
                 }
+                await txn.Commit();
             }
         }
 
@@ -117,14 +125,18 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                 token);
 
             if (!validationResult.HasErrors)
-                await this.tagClient.ChangeTag(
-                    this.settingsService.TagInBaseUrl + "/",
-                    message.Id.ToString(),
-                    message.NewTag,
-                    message.ExpectedVersion,
-                    validationResult.UserNeuronId.ToString(),
-                    token
-                    );
+            {
+                var txn = await Transaction.Begin(this.eventStore, this.inMemoryEventStore, message.Id, validationResult.UserNeuronId, message.ExpectedVersion);
+                await txn.InvokeAdapter(
+                    typeof(ei8.Data.Tag.Domain.Model.TagChanged).Assembly,
+                    async (ev) => await this.tagItemAdapter.ChangeTag(
+                        message.Id,
+                        message.NewTag,
+                        validationResult.UserNeuronId,
+                        ev
+                    ));
+                await txn.Commit();
+            }
         }
 
         public async Task Handle(ChangeNeuronExternalReferenceUrl message, CancellationToken token = default(CancellationToken))
@@ -139,14 +151,19 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                 token);
 
             if (!validationResult.HasErrors)
-                await this.externalReferenceClient.ChangeUrl(
-                    this.settingsService.ExternalReferenceInBaseUrl + "/",
-                    message.Id.ToString(),
-                    message.NewExternalReferenceUrl,
-                    message.ExpectedVersion,
-                    validationResult.UserNeuronId.ToString(),
-                    token
-                    );
+            {
+                var txn = await Transaction.Begin(this.eventStore, this.inMemoryEventStore, message.Id, validationResult.UserNeuronId, message.ExpectedVersion);
+                await txn.InvokeAdapter(
+                    typeof(ei8.Data.ExternalReference.Domain.Model.UrlChanged).Assembly,
+                    async (ev) => await this.externalReferenceAdapter.ChangeUrl(
+                        message.Id,
+                        message.NewExternalReferenceUrl,
+                        validationResult.UserNeuronId,
+                        ev
+                    ));
+
+                await txn.Commit();
+            }
         }
 
         public async Task Handle(DeactivateNeuron message, CancellationToken token = default(CancellationToken))
@@ -161,13 +178,18 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                 token);
 
             if (!validationResult.HasErrors)
-                await this.neuronClient.DeactivateNeuron(
-                    this.settingsService.CortexInBaseUrl + "/",
-                    message.Id.ToString(),
-                    message.ExpectedVersion,
-                    validationResult.UserNeuronId.ToString(),
-                    token
-                    );            
+            {
+                var txn = await Transaction.Begin(this.eventStore, this.inMemoryEventStore, message.Id, validationResult.UserNeuronId, message.ExpectedVersion);
+                await txn.InvokeAdapter(
+                    typeof(NeuronCreated).Assembly,
+                    async (ev) => await this.neuronAdapter.DeactivateNeuron(
+                        message.Id,
+                        validationResult.UserNeuronId,
+                        ev
+                    ));
+
+                await txn.Commit();
+            }
         }
     }
 }

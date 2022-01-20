@@ -1,11 +1,15 @@
 ﻿using CQRSlite.Commands;
+using CQRSlite.Events;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands;
 using ei8.Cortex.Graph.Client;
 using ei8.Cortex.IdentityAccess.Client.Out;
-using ei8.Data.ExternalReference.Client.In;
+using ei8.EventSourcing.Client;
 using neurUL.Common.Domain.Model;
-using neurUL.Cortex.Client.In;
+using neurUL.Cortex.Domain.Model.Neurons;
+using neurUL.Cortex.Port.Adapter.In.InProcess;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,22 +19,36 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         ICancellableCommandHandler<CreateTerminal>,
         ICancellableCommandHandler<DeactivateTerminal>
     {
-        private readonly ITerminalClient terminalClient;
-        private readonly IExternalReferenceClient externalReferenceClient;
+        private readonly IAuthoredEventStore eventStore;
+        private readonly IInMemoryAuthoredEventStore inMemoryEventStore;
+        private readonly ITerminalAdapter terminalAdapter;
+        private readonly ei8.Data.ExternalReference.Port.Adapter.In.InProcess.IItemAdapter externalReferenceAdapter;
         private readonly IValidationClient validationClient;
         private readonly INeuronGraphQueryClient neuronGraphQueryClient;
         private readonly ISettingsService settingsService;
 
-        public TerminalCommandHandlers(ITerminalClient terminalClient, IExternalReferenceClient externalReferenceClient, IValidationClient validationClient, INeuronGraphQueryClient neuronGraphQueryClient, ISettingsService settingsService)
+        public TerminalCommandHandlers(
+            IAuthoredEventStore eventStore, 
+            IInMemoryAuthoredEventStore inMemoryEventStore, 
+            ITerminalAdapter terminalAdapter,
+            ei8.Data.ExternalReference.Port.Adapter.In.InProcess.IItemAdapter externalReferenceAdapter, 
+            IValidationClient validationClient, 
+            INeuronGraphQueryClient neuronGraphQueryClient, 
+            ISettingsService settingsService
+            )
         {
-            AssertionConcern.AssertArgumentNotNull(terminalClient, nameof(terminalClient));
-            AssertionConcern.AssertArgumentNotNull(externalReferenceClient, nameof(externalReferenceClient));
+            AssertionConcern.AssertArgumentNotNull(eventStore, nameof(eventStore));
+            AssertionConcern.AssertArgumentNotNull(inMemoryEventStore, nameof(inMemoryEventStore));
+            AssertionConcern.AssertArgumentNotNull(terminalAdapter, nameof(terminalAdapter));
+            AssertionConcern.AssertArgumentNotNull(externalReferenceAdapter, nameof(externalReferenceAdapter));
             AssertionConcern.AssertArgumentNotNull(validationClient, nameof(validationClient));
             AssertionConcern.AssertArgumentNotNull(neuronGraphQueryClient, nameof(neuronGraphQueryClient));
             AssertionConcern.AssertArgumentNotNull(settingsService, nameof(settingsService));
 
-            this.terminalClient = terminalClient;
-            this.externalReferenceClient = externalReferenceClient;
+            this.eventStore = (IAuthoredEventStore)eventStore;
+            this.inMemoryEventStore = (IInMemoryAuthoredEventStore)inMemoryEventStore; 
+            this.terminalAdapter = terminalAdapter;
+            this.externalReferenceAdapter = externalReferenceAdapter;
             this.validationClient = validationClient;
             this.neuronGraphQueryClient = neuronGraphQueryClient;
             this.settingsService = settingsService;
@@ -49,30 +67,34 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
             if (!validationResult.HasErrors)
             {
-                int expectedVersion = 0;
-                await this.terminalClient.CreateTerminal(
-                    this.settingsService.CortexInBaseUrl + "/",
-                    message.Id.ToString(),
-                    message.PresynapticNeuronId.ToString(),
-                    message.PostsynapticNeuronId.ToString(),
-                    message.Effect,
-                    message.Strength,
-                    validationResult.UserNeuronId.ToString(),
-                    token
-                );
+                var txn = await Transaction.Begin(this.eventStore, this.inMemoryEventStore, message.Id, validationResult.UserNeuronId);
+
+                var otherAggregateEvents = await (new Guid[] { message.PresynapticNeuronId, message.PostsynapticNeuronId }).SelectManyAsync(g => this.eventStore.Get(g, -1));
+                await txn.InvokeAdapter(
+                    typeof(TerminalCreated).Assembly,
+                    async (ev) => await this.terminalAdapter.CreateTerminal(
+                        message.Id,
+                        message.PresynapticNeuronId,
+                        message.PostsynapticNeuronId,
+                        message.Effect,
+                        message.Strength,
+                        validationResult.UserNeuronId
+                    ),
+                    Transaction.ReplaceUnrecognizedEvents(otherAggregateEvents, typeof(NeuronCreated).Assembly)
+                    );
 
                 if (!string.IsNullOrWhiteSpace(message.ExternalReferenceUrl))
                 {
-                    expectedVersion++;
-                    await this.externalReferenceClient.ChangeUrl(
-                        this.settingsService.ExternalReferenceInBaseUrl + "/",
-                        message.Id.ToString(),
-                        message.ExternalReferenceUrl,
-                        expectedVersion,
-                        validationResult.UserNeuronId.ToString(),
-                        token
-                        );
+                    await txn.InvokeAdapter(
+                        typeof(ei8.Data.ExternalReference.Domain.Model.UrlChanged).Assembly,
+                        async (ev) => await this.externalReferenceAdapter.ChangeUrl(
+                            message.Id,
+                            message.ExternalReferenceUrl,
+                            validationResult.UserNeuronId,
+                            ev
+                        ));
                 }
+                await txn.Commit();
             }
         }
 
@@ -80,12 +102,15 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         {
             AssertionConcern.AssertArgumentNotNull(message, nameof(message));
 
-            var terminal = await this.neuronGraphQueryClient.GetTerminalById(
+            var queryResult = await this.neuronGraphQueryClient.GetTerminalById(
                 this.settingsService.CortexGraphOutBaseUrl + "/", 
                 message.Id.ToString(),
                 new Graph.Common.NeuronQuery() { TerminalActiveValues = Graph.Common.ActiveValues.All },
                 token
                 );
+
+            var terminal = queryResult.Neurons.FirstOrDefault()?.Terminal;
+            AssertionConcern.AssertArgumentValid(t => t != null, terminal, "Specified terminal does not exist.", "Id");
 
             // validate
             var validationResult = await this.validationClient.UpdateNeuron(
@@ -95,13 +120,18 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                 token);
 
             if (!validationResult.HasErrors)
-                await this.terminalClient.DeactivateTerminal(
-                    this.settingsService.CortexInBaseUrl + "/",
-                    message.Id.ToString(),
-                    message.ExpectedVersion,
-                    validationResult.UserNeuronId.ToString(),
-                    token
-                );
+            {
+                var txn = await Transaction.Begin(this.eventStore, this.inMemoryEventStore, message.Id, validationResult.UserNeuronId, message.ExpectedVersion);
+                await txn.InvokeAdapter(
+                    typeof(TerminalDeactivated).Assembly,
+                    async (ev) => await this.terminalAdapter.DeactivateTerminal(
+                        message.Id,
+                        validationResult.UserNeuronId,
+                        ev
+                    ));
+
+                await txn.Commit();
+            }
         }
     }
 }
