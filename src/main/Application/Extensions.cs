@@ -1,8 +1,9 @@
-﻿using System;
+﻿using ei8.Cortex.Diary.Common;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using ei8.Cortex.Diary.Common;
+using System.Threading.Tasks;
 
 namespace ei8.Cortex.Diary.Nucleus.Application
 {
@@ -38,6 +39,12 @@ namespace ei8.Cortex.Diary.Nucleus.Application
                 TypeName = value.TypeName,
                 Version = value.Version
             };
+        }
+
+        // TODO: transfer to common
+        public static async Task<IEnumerable<T1>> SelectManyAsync<T, T1>(this IEnumerable<T> enumeration, Func<T, Task<IEnumerable<T1>>> func)
+        {
+            return (await Task.WhenAll(enumeration.Select(func))).SelectMany(s => s);
         }
     }
 }

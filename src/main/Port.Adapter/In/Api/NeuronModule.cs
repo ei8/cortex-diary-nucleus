@@ -44,9 +44,8 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                             );                            
                         },
                         (ex, hsc) => { 
-                            // TODO:
-                            // log exception in ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api.NeuronModule line 47
-						    // immediately cause calling Polly to fail (handle specific failure http code to signal "it's not worth retrying"?)
+						    // TODO: immediately cause calling Polly to fail (handle specific failure http code to signal "it's not worth retrying"?)
+                            // i.e. there is an issue with the data
                             HttpStatusCode result = hsc;                   
                             if (ex is ConcurrencyException)
                                 result = HttpStatusCode.Conflict;                            
