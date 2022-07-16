@@ -11,5 +11,6 @@ namespace ei8.Cortex.Diary.Nucleus.Application
         string EventSourcingOutBaseUrl { get; }
         string IdentityAccessInBaseUrl { get; }
         string IdentityAccessOutBaseUrl { get; }
+        string SubscriptionsInBaseUrl { get; }
     }
 }
