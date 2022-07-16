@@ -21,7 +21,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Test.Neurons.Commands.DeactivateT
         protected virtual Guid AuthorId => this.authorId = this.authorId == Guid.Empty ? Guid.NewGuid() : this.authorId;
         protected virtual int ExpectedVersion => this.expectedVersion = this.expectedVersion == 0 ? 1 : this.expectedVersion;
 
-        protected override void When() => this.sut = new DeactivateTerminal(this.Id, this.AuthorId, this.ExpectedVersion);
+        protected override void When() => this.sut = new DeactivateTerminal(this.Id, this.AuthorId.ToString(), this.ExpectedVersion);
     }
 
     public class When_constructing
@@ -101,7 +101,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Test.Neurons.Commands.DeactivateT
         [Fact]
         public void Then_should_have_correct_author_id()
         {
-            Assert.Equal(this.AuthorId, this.sut.UserId);
+            Assert.Equal(this.AuthorId.ToString(), this.sut.UserId);
         }
 
         [Fact]
