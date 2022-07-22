@@ -9,6 +9,7 @@ using ei8.Cortex.Diary.Nucleus.Port.Adapter.IO.Process.Services;
 using ei8.Cortex.Graph.Client;
 using ei8.Cortex.IdentityAccess.Client.Out;
 using ei8.Cortex.Subscriptions.Client;
+using ei8.Cortex.Subscriptions.Client.In;
 using ei8.EventSourcing.Client;
 using Nancy;
 using Nancy.TinyIoc;

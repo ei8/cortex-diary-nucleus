@@ -1,6 +1,6 @@
 ﻿using CQRSlite.Commands;
 using ei8.Cortex.Diary.Nucleus.Application.Subscriptions.Commands;
-using ei8.Cortex.Subscriptions.Client;
+using ei8.Cortex.Subscriptions.Client.In;
 using neurUL.Common.Domain.Model;
 using System.Threading;
 using System.Threading.Tasks;
