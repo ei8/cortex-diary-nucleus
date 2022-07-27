@@ -72,6 +72,13 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                                     bodyAsObject.UserId.ToString(),
                                     expectedVersion
                                     );
+                            else if (bodyAsDictionary.ContainsKey("RegionId"))
+                                result = new ChangeNeuronRegionId(
+                                    Guid.Parse(parameters.neuronId),
+                                    bodyAsObject.RegionId.ToString(),
+                                    bodyAsObject.UserId.ToString(),
+                                    expectedVersion
+                                    );
                             else if (bodyAsDictionary.ContainsKey("ExternalReferenceUrl"))
                                 result = new ChangeNeuronExternalReferenceUrl(
                                     Guid.Parse(parameters.neuronId),
