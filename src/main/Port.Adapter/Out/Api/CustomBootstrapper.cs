@@ -13,6 +13,7 @@ using ei8.EventSourcing.Client.Out;
 using ei8.Cortex.IdentityAccess.Client.Out;
 using ei8.Cortex.Subscriptions.Client.Out;
 using System.Net.Http;
+using ei8.Cortex.Diary.Nucleus.Application.Subscriptions;
 
 namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.Out.Api
 {
@@ -39,6 +40,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.Out.Api
             container.Register<IEventSerializer, EventSerializer>();
             container.Register<INotificationClient, HttpNotificationClient>();
             container.Register<INotificationApplicationService, NotificationApplicationService>();
+            container.Register<ISubscriptionConfigurationQueryService, SubscriptionConfigurationQueryService>();
             container.Register<ISubscriptionsConfigurationClient, HttpSubscriptionConfigurationClient>();
         }
     }
