@@ -20,7 +20,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         {
                             var subscriptionInfo = new BrowserSubscriptionInfo()
                             {
-                                UserId = bodyAsObject.userId,
+                                UserId = bodyAsObject.UserId.ToString(),
                                 AvatarUrl = bodyAsObject.avatarUrl,
                                 Name = bodyAsObject.name,
                                 PushEndpoint = bodyAsObject.pushEndpoint,
