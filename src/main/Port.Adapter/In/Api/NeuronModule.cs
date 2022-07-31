@@ -89,7 +89,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                             await commandSender.Send(result);
                         },
                         ConcurrencyExceptionSetter,
-                        new string[] { "Tag", "ExternalReferenceUrl" },
+                        new string[] { "Tag", "RegionId", "ExternalReferenceUrl" },
                         "UserId"
                     );
             }

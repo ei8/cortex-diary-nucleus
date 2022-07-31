@@ -16,7 +16,8 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         ICancellableCommandHandler<CreateNeuron>,
         ICancellableCommandHandler<ChangeNeuronTag>,
         ICancellableCommandHandler<ChangeNeuronExternalReferenceUrl>,
-        ICancellableCommandHandler<DeactivateNeuron>
+        ICancellableCommandHandler<DeactivateNeuron>,
+        ICancellableCommandHandler<ChangeNeuronRegionId>
     {
         private readonly INeuronAdapter neuronAdapter;
         private readonly IAuthoredEventStore eventStore;
