@@ -21,7 +21,7 @@
     <PackageReference Include="ei8.Data.Tag.Port.Adapter.In.InProcess" Version="0.1.11" />
     <PackageReference Include="ei8.EventSourcing.Client" Version="0.2.6" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.6.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Owin" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Owin" Version="3.1.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
