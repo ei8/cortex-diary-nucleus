@@ -9,5 +9,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.Common
         public const string EventSourcingOutBaseUrl = "EVENT_SOURCING_OUT_BASE_URL";
         public const string IdentityAccessInBaseUrl = "IDENTITY_ACCESS_IN_BASE_URL";
         public const string IdentityAccessOutBaseUrl = "IDENTITY_ACCESS_OUT_BASE_URL";
+        public const string SubscriptionsInBaseUrl = "SUBSCRIPTIONS_IN_BASE_URL";
+        public const string SubscriptionsOutBaseUrl = "SUBSCRIPTIONS_OUT_BASE_URL";
     }
 }
