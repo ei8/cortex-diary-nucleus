@@ -21,11 +21,11 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                             var subscriptionInfo = new BrowserSubscriptionInfo()
                             {
                                 UserId = bodyAsObject.UserId.ToString(),
-                                AvatarUrl = bodyAsObject.avatarUrl,
-                                Name = bodyAsObject.name,
-                                PushEndpoint = bodyAsObject.pushEndpoint,
-                                PushAuth = bodyAsObject.pushAuth,
-                                PushP256DH = bodyAsObject.pushP256dh,
+                                AvatarUrl = bodyAsObject.AvatarUrl,
+                                Name = bodyAsObject.Name,
+                                PushEndpoint = bodyAsObject.PushEndpoint,
+                                PushAuth = bodyAsObject.PushAuth,
+                                PushP256DH = bodyAsObject.PushP256DH,
                             };
 
                             await commandSender.Send(new AddSubscription(subscriptionInfo, expectedVersion));
