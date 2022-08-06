@@ -35,7 +35,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         "AvatarUrl",
                         "Name",
                         "PushAuth",
-                        "PushP256dh",
+                        "PushP256DH",
                         "PushEndpoint",
                         "UserId"
                         );
