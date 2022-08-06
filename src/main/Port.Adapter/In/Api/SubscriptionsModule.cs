@@ -4,6 +4,7 @@ using ei8.Cortex.Diary.Nucleus.Application.Subscriptions.Commands;
 using ei8.Cortex.Subscriptions.Common;
 using Nancy;
 using neurUL.Common.Api;
+using System;
 
 namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 {
@@ -20,7 +21,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         {
                             var subscriptionInfo = new BrowserSubscriptionInfo()
                             {
-                                UserId = bodyAsObject.UserId.ToString(),
+                                UserId = Guid.Parse(bodyAsObject.UserId.ToString()),
                                 AvatarUrl = bodyAsObject.AvatarUrl,
                                 Name = bodyAsObject.Name,
                                 PushEndpoint = bodyAsObject.PushEndpoint,
