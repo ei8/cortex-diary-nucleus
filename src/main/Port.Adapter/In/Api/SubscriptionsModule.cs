@@ -32,12 +32,12 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         },
                         NeuronModule.ConcurrencyExceptionSetter,
                         new string[0],
-                        "userId",
-                        "avatarUrl",
-                        "name",
-                        "pushAuth",
-                        "pushP256dh",
-                        "pushEndpoint"
+                        "AvatarUrl",
+                        "Name",
+                        "PushAuth",
+                        "PushP256dh",
+                        "PushEndpoint",
+                        "UserId"
                         );
             });
         }
