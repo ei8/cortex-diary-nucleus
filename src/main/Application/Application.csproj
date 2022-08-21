@@ -10,7 +10,7 @@
     <PackageReference Include="CqrsLite" Version="0.18.1" />
     <PackageReference Include="ei8.Cortex.Diary.Common" Version="0.1.11" />
     <PackageReference Include="ei8.Cortex.Graph.Client" Version="0.2.4" />
-    <PackageReference Include="ei8.Cortex.IdentityAccess.Client" Version="0.1.12" />
+    <PackageReference Include="ei8.Cortex.IdentityAccess.Client" Version="0.1.13" />
     <PackageReference Include="ei8.Cortex.Subscriptions.Client" Version="0.1.0" />
     <PackageReference Include="ei8.Data.Aggregate.Port.Adapter.In.InProcess" Version="0.1.0" />
     <PackageReference Include="ei8.Data.ExternalReference.Port.Adapter.In.InProcess" Version="0.1.0" />
