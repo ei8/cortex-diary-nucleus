@@ -1,6 +1,5 @@
 ﻿using CQRSlite.Commands;
 using CQRSlite.Domain;
-using CQRSlite.Events;
 using CQRSlite.Routing;
 using ei8.Cortex.Diary.Nucleus.Application;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons;
@@ -8,8 +7,8 @@ using ei8.Cortex.Diary.Nucleus.Application.Subscriptions;
 using ei8.Cortex.Diary.Nucleus.Port.Adapter.IO.Process.Services;
 using ei8.Cortex.Graph.Client;
 using ei8.Cortex.IdentityAccess.Client.Out;
-using ei8.Cortex.Subscriptions.Client;
 using ei8.Cortex.Subscriptions.Client.In;
+using ei8.Cortex.Subscriptions.Common.Receivers;
 using ei8.EventSourcing.Client;
 using Nancy;
 using Nancy.TinyIoc;
@@ -59,7 +58,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             container.Register<IInMemoryAuthoredEventStore, InMemoryEventStore>();
             container.Register<IRepository>((tic, npo) => new Repository(container.Resolve<IInMemoryAuthoredEventStore>()));
             container.Register<ISession, Session>();
-            container.Register<ISubscriptionsClient, HttpSubscriptionsClient>();
+            container.Register<ISubscriptionsClient<BrowserReceiverInfo>, HttpSubscriptionsClient<BrowserReceiverInfo>>();
             // neuron
             container.Register<INeuronAdapter, NeuronAdapter>();
             container.Register((tic, npo) => new neurUL.Cortex.Application.Neurons.NeuronCommandHandlers(container.Resolve<IInMemoryAuthoredEventStore>(), container.Resolve<ISession>()));
@@ -77,7 +76,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 
             container.Register<NeuronCommandHandlers>();
             container.Register<TerminalCommandHandlers>();
-            container.Register<SubscriptionCommandHandlers>();
+            container.Register<SubscriptionCommandHandlers<BrowserReceiverInfo>>();
 
             var ticl = new TinyIoCServiceLocator(container);
             container.Register<IServiceProvider, TinyIoCServiceLocator>(ticl);

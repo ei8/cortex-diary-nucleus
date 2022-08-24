@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PreserveCompilationContext>true</PreserveCompilationContext>
@@ -12,7 +12,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CqrsLite" Version="0.18.1" />
-    <PackageReference Include="ei8.Cortex.Subscriptions.Common" Version="0.1.1" />
     <PackageReference Include="ei8.Data.Aggregate.Common" Version="0.1.1" />
     <PackageReference Include="ei8.Data.Aggregate.Port.Adapter.In.InProcess" Version="0.1.0" />
     <PackageReference Include="ei8.Data.ExternalReference.Common" Version="0.1.4" />

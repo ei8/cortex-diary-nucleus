@@ -1,7 +1,7 @@
 ﻿using CQRSlite.Commands;
-using ei8.Cortex.Diary.Nucleus.Application;
 using ei8.Cortex.Diary.Nucleus.Application.Subscriptions.Commands;
 using ei8.Cortex.Subscriptions.Common;
+using ei8.Cortex.Subscriptions.Common.Receivers;
 using Nancy;
 using neurUL.Common.Api;
 using System;
@@ -10,37 +10,48 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 {
     public class SubscriptionsModule : NancyModule
     {
-        public SubscriptionsModule(ICommandSender commandSender,
-            ISettingsService settings) : base("/nuclei/d23/subscriptions")
+        public SubscriptionsModule(ICommandSender commandSender) : base("/nuclei/d23/subscriptions")
         {
-            this.Post("/", async (parameters) =>
+            this.Post("/receivers/{receiverType}", async (parameters) =>
             {
                 return await this.Request.ProcessCommand(
                         false,
                         async (bodyAsObject, bodyAsDictionary, expectedVersion) =>
                         {
-                            var subscriptionInfo = new BrowserSubscriptionInfo()
+                            var subscriptionInfo = new SubscriptionInfo()
                             {
                                 UserId = Guid.Parse(bodyAsObject.UserId.ToString()),
-                                AvatarUrl = bodyAsObject.AvatarUrl,
-                                Name = bodyAsObject.Name,
-                                PushEndpoint = bodyAsObject.PushEndpoint,
-                                PushAuth = bodyAsObject.PushAuth,
-                                PushP256DH = bodyAsObject.PushP256DH,
+                                AvatarUrl = bodyAsObject.SubscriptionInfo.AvatarUrl,
                             };
 
-                            await commandSender.Send(new AddSubscription(subscriptionInfo, expectedVersion));
+                            var receiverInfo = this.DeserializeReceiverRequest(bodyAsObject.ReceiverInfo, parameters.receiverType);
+                            await commandSender.Send(new AddSubscription<IReceiverInfo>(subscriptionInfo, receiverInfo, expectedVersion));
                         },
                         NeuronModule.ConcurrencyExceptionSetter,
                         new string[0],
-                        "AvatarUrl",
-                        "Name",
-                        "PushAuth",
-                        "PushP256DH",
-                        "PushEndpoint",
+                        "SubscriptionInfo",
+                        "ReceiverInfo",
                         "UserId"
                         );
             });
+        }
+
+        private IReceiverInfo DeserializeReceiverRequest(dynamic receiverInfo, string receiverType)
+        {
+            switch (receiverType)
+            {
+                case "web":
+                    return new BrowserReceiverInfo()
+                    {
+                        Name = receiverInfo.Name,
+                        PushAuth = receiverInfo.PushAuth,
+                        PushEndpoint = receiverInfo.PushEndpoint,
+                        PushP256DH = receiverInfo.PushP256DH,
+                    };
+
+                default:
+                    throw new NotSupportedException($"Unsupported receiver type for endpoint {receiverType}");
+            }
         }
     }
 }
