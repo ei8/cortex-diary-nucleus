@@ -5,6 +5,7 @@ using ei8.Cortex.Subscriptions.Common.Receivers;
 using Nancy;
 using neurUL.Common.Api;
 using System;
+using System.Threading.Tasks;
 
 namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 {
@@ -18,14 +19,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         false,
                         async (bodyAsObject, bodyAsDictionary, expectedVersion) =>
                         {
-                            var subscriptionInfo = new SubscriptionInfo()
-                            {
-                                UserId = Guid.Parse(bodyAsObject.UserId.ToString()),
-                                AvatarUrl = bodyAsObject.SubscriptionInfo.AvatarUrl,
-                            };
-
-                            var receiverInfo = this.DeserializeReceiverRequest(bodyAsObject.ReceiverInfo, parameters.receiverType);
-                            await commandSender.Send(new AddSubscription<IReceiverInfo>(subscriptionInfo, receiverInfo, expectedVersion));
+                            await SendGenericRequestAsync(commandSender, bodyAsObject, parameters.receiverType, expectedVersion);
                         },
                         NeuronModule.ConcurrencyExceptionSetter,
                         new string[0],
@@ -36,18 +30,26 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             });
         }
 
-        private IReceiverInfo DeserializeReceiverRequest(dynamic receiverInfo, string receiverType)
+        private async Task SendGenericRequestAsync(ICommandSender commandSender, dynamic bodyAsObject, string receiverType, int expectedVersion)
         {
+            var subscriptionInfo = new SubscriptionInfo()
+            {
+                UserId = Guid.Parse(bodyAsObject.UserId.ToString()),
+                AvatarUrl = bodyAsObject.SubscriptionInfo.AvatarUrl,
+            };
+
             switch (receiverType)
             {
                 case "web":
-                    return new BrowserReceiverInfo()
+                    var receiverInfo = new BrowserReceiverInfo()
                     {
-                        Name = receiverInfo.Name,
-                        PushAuth = receiverInfo.PushAuth,
-                        PushEndpoint = receiverInfo.PushEndpoint,
-                        PushP256DH = receiverInfo.PushP256DH,
+                        Name = bodyAsObject.ReceiverInfo.Name,
+                        PushAuth = bodyAsObject.ReceiverInfo.PushAuth,
+                        PushEndpoint = bodyAsObject.ReceiverInfo.PushEndpoint,
+                        PushP256DH = bodyAsObject.ReceiverInfo.PushP256DH,
                     };
+                    await commandSender.Send(new AddSubscription<BrowserReceiverInfo>(subscriptionInfo, receiverInfo, expectedVersion));
+                    break;
 
                 default:
                     throw new NotSupportedException($"Unsupported receiver type for endpoint {receiverType}");

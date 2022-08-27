@@ -76,7 +76,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 
             container.Register<NeuronCommandHandlers>();
             container.Register<TerminalCommandHandlers>();
-            container.Register<SubscriptionCommandHandlers<BrowserReceiverInfo>>();
+            container.Register<BrowserSubscriptionCommandHandlers>();
 
             var ticl = new TinyIoCServiceLocator(container);
             container.Register<IServiceProvider, TinyIoCServiceLocator>(ticl);
@@ -90,8 +90,6 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             registrar.Register(typeof(ei8.Data.Aggregate.Application.ItemCommandHandlers));
             // external reference
             registrar.Register(typeof(ei8.Data.ExternalReference.Application.ItemCommandHandlers));
-            // subscriptions
-            //registrar.Register(typeof(SubscriptionCommandHandlers));
 
             ((TinyIoCServiceLocator)container.Resolve<IServiceProvider>()).SetRequestContainer(container);
         }

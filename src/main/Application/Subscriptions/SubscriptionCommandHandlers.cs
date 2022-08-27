@@ -10,7 +10,15 @@ using System.Threading.Tasks;
 
 namespace ei8.Cortex.Diary.Nucleus.Application.Subscriptions
 {
-    public class SubscriptionCommandHandlers<T> : ICancellableCommandHandler<AddSubscription<T>>
+    public class BrowserSubscriptionCommandHandlers : SubscriptionCommandHandlers<BrowserReceiverInfo>, ICancellableCommandHandler<AddSubscription<BrowserReceiverInfo>>
+    {
+        public BrowserSubscriptionCommandHandlers
+            (ISubscriptionsClient<BrowserReceiverInfo> subscriptionsClient, ISettingsService settingsService) : base(subscriptionsClient, settingsService)
+        {
+        }
+    }
+
+    public abstract class SubscriptionCommandHandlers<T>
         where T : IReceiverInfo
     {
         private readonly ISubscriptionsClient<T> subscriptionsClient;
