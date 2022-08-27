@@ -34,7 +34,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
         {
             var subscriptionInfo = new SubscriptionInfo()
             {
-                UserId = Guid.Parse(bodyAsObject.UserId.ToString()),
+                UserNeuronId = Guid.Parse(bodyAsObject.UserId.ToString()),
                 AvatarUrl = bodyAsObject.SubscriptionInfo.AvatarUrl,
             };
 
