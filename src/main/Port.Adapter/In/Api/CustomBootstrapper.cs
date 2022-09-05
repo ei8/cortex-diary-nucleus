@@ -58,7 +58,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             container.Register<IInMemoryAuthoredEventStore, InMemoryEventStore>();
             container.Register<IRepository>((tic, npo) => new Repository(container.Resolve<IInMemoryAuthoredEventStore>()));
             container.Register<ISession, Session>();
-            container.Register<ISubscriptionsClient<BrowserReceiverInfo>, HttpSubscriptionsClient<BrowserReceiverInfo>>();
+            container.Register<ISubscriptionsClient, HttpSubscriptionsClient>();
             // neuron
             container.Register<INeuronAdapter, NeuronAdapter>();
             container.Register((tic, npo) => new neurUL.Cortex.Application.Neurons.NeuronCommandHandlers(container.Resolve<IInMemoryAuthoredEventStore>(), container.Resolve<ISession>()));
@@ -76,7 +76,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 
             container.Register<NeuronCommandHandlers>();
             container.Register<TerminalCommandHandlers>();
-            container.Register<BrowserSubscriptionCommandHandlers>();
+            container.Register<SubscriptionCommandHandlers>();
 
             var ticl = new TinyIoCServiceLocator(container);
             container.Register<IServiceProvider, TinyIoCServiceLocator>(ticl);

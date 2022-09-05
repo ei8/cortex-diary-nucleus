@@ -34,7 +34,6 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
         {
             var subscriptionInfo = new SubscriptionInfo()
             {
-                UserNeuronId = Guid.Parse(bodyAsObject.UserId.ToString()),
                 AvatarUrl = bodyAsObject.SubscriptionInfo.AvatarUrl,
             };
 
@@ -48,7 +47,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                         PushEndpoint = bodyAsObject.ReceiverInfo.PushEndpoint,
                         PushP256DH = bodyAsObject.ReceiverInfo.PushP256DH,
                     };
-                    await commandSender.Send(new AddSubscription<BrowserReceiverInfo>(subscriptionInfo, receiverInfo, expectedVersion));
+                    await commandSender.Send(new AddSubscription<BrowserReceiverInfo>(subscriptionInfo, receiverInfo, bodyAsObject.UserId.ToString(), expectedVersion));
                     break;
 
                 default:
