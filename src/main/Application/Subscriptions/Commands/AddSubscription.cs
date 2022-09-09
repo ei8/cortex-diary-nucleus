@@ -1,17 +1,23 @@
 ﻿using CQRSlite.Commands;
 using ei8.Cortex.Subscriptions.Common;
+using ei8.Cortex.Subscriptions.Common.Receivers;
 
 namespace ei8.Cortex.Diary.Nucleus.Application.Subscriptions.Commands
 {
-    public class AddSubscription : ICommand
+    public class AddSubscription<T> : ICommand 
+        where T: IReceiverInfo
     {
-        public AddSubscription(BrowserSubscriptionInfo subscriptionInfo, int expectedVersion)
+        public AddSubscription(SubscriptionInfo subscriptionInfo, T receiverInfo, string userId, int expectedVersion)
         {
             this.SubscriptionInfo = subscriptionInfo;
+            this.ReceiverInfo = receiverInfo;
+            this.UserId = userId;
             this.ExpectedVersion = expectedVersion;
         }
 
-        public BrowserSubscriptionInfo SubscriptionInfo { get; private set; }
+        public SubscriptionInfo SubscriptionInfo { get; private set; }
+        public T ReceiverInfo { get; private set; }
+        public string UserId { get; private set; }
         public int ExpectedVersion { get; private set; }
     }
 }

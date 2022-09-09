@@ -1,6 +1,5 @@
 ﻿using CQRSlite.Commands;
 using CQRSlite.Domain;
-using CQRSlite.Events;
 using CQRSlite.Routing;
 using ei8.Cortex.Diary.Nucleus.Application;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons;
@@ -8,8 +7,8 @@ using ei8.Cortex.Diary.Nucleus.Application.Subscriptions;
 using ei8.Cortex.Diary.Nucleus.Port.Adapter.IO.Process.Services;
 using ei8.Cortex.Graph.Client;
 using ei8.Cortex.IdentityAccess.Client.Out;
-using ei8.Cortex.Subscriptions.Client;
 using ei8.Cortex.Subscriptions.Client.In;
+using ei8.Cortex.Subscriptions.Common.Receivers;
 using ei8.EventSourcing.Client;
 using Nancy;
 using Nancy.TinyIoc;
@@ -91,8 +90,6 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             registrar.Register(typeof(ei8.Data.Aggregate.Application.ItemCommandHandlers));
             // external reference
             registrar.Register(typeof(ei8.Data.ExternalReference.Application.ItemCommandHandlers));
-            // subscriptions
-            //registrar.Register(typeof(SubscriptionCommandHandlers));
 
             ((TinyIoCServiceLocator)container.Resolve<IServiceProvider>()).SetRequestContainer(container);
         }

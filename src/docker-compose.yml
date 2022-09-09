@@ -2,12 +2,12 @@ version: '3.4'
 
 services:
   cortex.diary.nucleus.in.api:
-    image: ei8works/cortex.diary.nucleus.in.api:0.1.12
+    image: ei8works/cortex.diary.nucleus.in.api:0.2.0
     build:
       context: .
       dockerfile: ./main/Port.Adapter/In/Api/Dockerfile
   cortex.diary.nucleus.out.api:
-    image: ei8works/cortex.diary.nucleus.out.api:0.1.12
+    image: ei8works/cortex.diary.nucleus.out.api:0.2.0
     build:
       context: .
       dockerfile: ./main/Port.Adapter/Out/Api/Dockerfile
