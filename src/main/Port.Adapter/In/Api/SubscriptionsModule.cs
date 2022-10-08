@@ -49,6 +49,13 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                     };
                     await commandSender.Send(new AddSubscription<BrowserReceiverInfo>(subscriptionInfo, receiverInfo, bodyAsObject.UserId.ToString(), expectedVersion));
                     break;
+                case "smtp":
+                    var receiverInfo2 = new SmtpReceiverInfo()
+                    {
+                        EmailAddress = bodyAsObject.ReceiverInfo.EmailAddress
+                    };
+                    await commandSender.Send(new AddSubscription<SmtpReceiverInfo>(subscriptionInfo, receiverInfo2, bodyAsObject.UserId.ToString(), expectedVersion));
+                    break;
 
                 default:
                     throw new NotSupportedException($"Unsupported receiver type for endpoint {receiverType}");

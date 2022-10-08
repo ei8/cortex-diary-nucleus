@@ -13,7 +13,8 @@ using System.Threading.Tasks;
 namespace ei8.Cortex.Diary.Nucleus.Application.Subscriptions
 {
     public class SubscriptionCommandHandlers :
-        ICancellableCommandHandler<AddSubscription<BrowserReceiverInfo>>
+        ICancellableCommandHandler<AddSubscription<BrowserReceiverInfo>>,
+        ICancellableCommandHandler<AddSubscription<SmtpReceiverInfo>>
     {
         private readonly ISubscriptionsClient subscriptionsClient;
         private readonly IValidationClient validationClient;
@@ -50,6 +51,29 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Subscriptions
             }
         }
 
+        public async Task Handle(AddSubscription<SmtpReceiverInfo> message, CancellationToken token = default)
+        {
+            AssertionConcern.AssertArgumentNotNull(message, nameof(message));
+            AssertionConcern.AssertArgumentNotNull(message.ReceiverInfo, nameof(message.ReceiverInfo));
+            AssertionConcern.AssertArgumentNotNull(message.SubscriptionInfo, nameof(message.SubscriptionInfo));
+
+            var validationResult = await this.validationClient.ReadNeurons(
+                this.settingsService.IdentityAccessOutBaseUrl + "/",
+                Enumerable.Empty<Guid>(),
+                message.UserId,
+                token
+                );
+
+            if (!validationResult.HasErrors)
+            {
+                message.SubscriptionInfo.UserNeuronId = validationResult.UserNeuronId;
+
+                var request = this.BuildRequestObject(message.SubscriptionInfo, message.ReceiverInfo);
+
+                await this.subscriptionsClient.AddSubscription(settingsService.SubscriptionsInBaseUrl, request, token);
+            }
+        }
+
         private IAddSubscriptionReceiverRequest<T> BuildRequestObject<T>(SubscriptionInfo subscriptionInfo, T receiverInfo) where T : IReceiverInfo
         {
             switch (receiverInfo)
@@ -59,6 +83,12 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Subscriptions
                     {
                         SubscriptionInfo = subscriptionInfo,
                         ReceiverInfo = br
+                    };
+                case SmtpReceiverInfo sr:
+                    return (IAddSubscriptionReceiverRequest<T>)new AddSubscriptionSmtpReceiverRequest()
+                    {
+                        SubscriptionInfo = subscriptionInfo,
+                        ReceiverInfo = sr
                     };
 
                 default:
