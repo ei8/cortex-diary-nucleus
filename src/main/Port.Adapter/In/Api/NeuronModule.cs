@@ -9,8 +9,8 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 {
     public class NeuronModule : NancyModule
     {
-        internal static readonly Func<Exception, HttpStatusCode, HttpStatusCode> ConcurrencyExceptionSetter = new Func<Exception, HttpStatusCode, HttpStatusCode>((ex, hsc) => { 
-                            HttpStatusCode result = hsc;                   
+        internal static readonly Func<Exception, HttpStatusCode> ConcurrencyExceptionSetter = new Func<Exception, HttpStatusCode>((ex) => { 
+                            HttpStatusCode result = HttpStatusCode.BadRequest;             
                             if (ex is ConcurrencyException)
                                 result = HttpStatusCode.Conflict;                            
                             return result;
@@ -43,10 +43,10 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                                 )
                             );                            
                         },
-                        (ex, hsc) => { 
-						    // TODO: immediately cause calling Polly to fail (handle specific failure http code to signal "it's not worth retrying"?)
+                        (ex) => {
+                            // TODO: immediately cause calling Polly to fail (handle specific failure http code to signal "it's not worth retrying"?)
                             // i.e. there is an issue with the data
-                            HttpStatusCode result = hsc;                   
+                            HttpStatusCode result = HttpStatusCode.BadRequest;           
                             if (ex is ConcurrencyException)
                                 result = HttpStatusCode.Conflict;                            
                             return result;
