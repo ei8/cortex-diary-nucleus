@@ -14,7 +14,6 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands
                    Messages.Exception.InvalidId,
                    nameof(id)
                    );
-            AssertionConcern.AssertArgumentNotNull(newRegionId, nameof(newRegionId));
             AssertionConcern.AssertArgumentNotEmpty(
                 userId,
                 Messages.Exception.InvalidUserId,

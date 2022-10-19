@@ -75,7 +75,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                             else if (bodyAsDictionary.ContainsKey("RegionId"))
                                 result = new ChangeNeuronRegionId(
                                     Guid.Parse(parameters.neuronId),
-                                    bodyAsObject.RegionId.ToString(),
+                                    bodyAsObject.RegionId == null ? null : bodyAsObject.RegionId.ToString(),
                                     bodyAsObject.UserId.ToString(),
                                     expectedVersion
                                     );

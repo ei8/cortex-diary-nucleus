@@ -184,7 +184,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                         typeof(ei8.Data.Aggregate.Domain.Model.AggregateChanged).Assembly,
                         async (ev) => await this.aggregateItemAdapter.ChangeAggregate(
                             message.Id,
-                            message.NewRegionId.ToString(),
+                            message.NewRegionId,
                             validationResult.UserNeuronId,
                             ev
                         ));
