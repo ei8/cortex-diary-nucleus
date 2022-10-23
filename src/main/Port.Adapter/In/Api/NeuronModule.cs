@@ -59,6 +59,24 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             }
             );
 
+            this.Post("/accessRequest/{neuronId}", async (parameters) =>
+            {
+                return await this.Request.ProcessCommand(
+                           false,
+                           async (bodyAsObject, bodyAsDictionary, expectedVersion) =>
+                           {
+                               await commandSender.Send(new CreateNeuronAccessRequest(
+                                   Guid.Parse(parameters.neuronId),
+                                   Guid.Parse(bodyAsObject.UserId.ToString())
+                                   )
+                               );
+                           },
+                           ConcurrencyExceptionSetter,
+                           new string[0],
+                           new string[] { "UserId" }
+                       );
+            });
+
             this.Patch("/{neuronId}", async (parameters) =>
             {
                 return await this.Request.ProcessCommand(

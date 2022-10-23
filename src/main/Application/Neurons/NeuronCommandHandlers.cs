@@ -1,6 +1,7 @@
 ﻿using CQRSlite.Commands;
 using CQRSlite.Events;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands;
+using ei8.Cortex.IdentityAccess.Client.In;
 using ei8.Cortex.IdentityAccess.Client.Out;
 using ei8.EventSourcing.Client;
 using neurUL.Common.Domain.Model;
@@ -16,7 +17,8 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         ICancellableCommandHandler<CreateNeuron>,
         ICancellableCommandHandler<ChangeNeuronTag>,
         ICancellableCommandHandler<ChangeNeuronExternalReferenceUrl>,
-        ICancellableCommandHandler<DeactivateNeuron>
+        ICancellableCommandHandler<DeactivateNeuron>,
+        ICancellableCommandHandler<CreateNeuronAccessRequest>
     {
         private readonly INeuronAdapter neuronAdapter;
         private readonly IAuthoredEventStore eventStore;
@@ -26,6 +28,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         private readonly ei8.Data.ExternalReference.Port.Adapter.In.InProcess.IItemAdapter externalReferenceAdapter;
         private readonly IValidationClient validationClient;
         private readonly ISettingsService settingsService;
+        private readonly IAccessRequestClient accessRequestClient;
 
         public NeuronCommandHandlers(
             IAuthoredEventStore eventStore, 
@@ -35,7 +38,8 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             ei8.Data.Aggregate.Port.Adapter.In.InProcess.IItemAdapter aggregateItemAdapter,
             ei8.Data.ExternalReference.Port.Adapter.In.InProcess.IItemAdapter externalReferenceAdapter, 
             IValidationClient validationClient, 
-            ISettingsService settingsService
+            ISettingsService settingsService,
+            IAccessRequestClient accessRequestClient
             )
         {
             AssertionConcern.AssertArgumentNotNull(neuronAdapter, nameof(neuronAdapter));
@@ -46,6 +50,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             AssertionConcern.AssertArgumentNotNull(externalReferenceAdapter, nameof(externalReferenceAdapter));
             AssertionConcern.AssertArgumentNotNull(validationClient, nameof(validationClient));
             AssertionConcern.AssertArgumentNotNull(settingsService, nameof(settingsService));
+            AssertionConcern.AssertArgumentNotNull(accessRequestClient, nameof(accessRequestClient));
 
             this.neuronAdapter = neuronAdapter;
             this.eventStore = (IAuthoredEventStore) eventStore;
@@ -55,6 +60,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             this.externalReferenceAdapter = externalReferenceAdapter;
             this.validationClient = validationClient;
             this.settingsService = settingsService;
+            this.accessRequestClient = accessRequestClient;
         }
 
         public async Task Handle(CreateNeuron message, CancellationToken token = default(CancellationToken))
@@ -190,6 +196,13 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
                 await txn.Commit();
             }
+        }
+
+        public async Task Handle(CreateNeuronAccessRequest message, CancellationToken token = default)
+        {
+            AssertionConcern.AssertArgumentNotNull(message, nameof(message));
+
+            await this.accessRequestClient.CreateAccessRequestAsync(this.settingsService.IdentityAccessInBaseUrl, message.NeuronId, message.UserNeuronId.ToString(), token);
         }
     }
 }
