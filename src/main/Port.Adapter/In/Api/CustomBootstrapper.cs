@@ -10,6 +10,7 @@ using ei8.Cortex.IdentityAccess.Client.In;
 using ei8.Cortex.IdentityAccess.Client.Out;
 using ei8.Cortex.Subscriptions.Client.In;
 using ei8.EventSourcing.Client;
+using ei8.EventSourcing.Client.Out;
 using Nancy;
 using Nancy.TinyIoc;
 using neurUL.Common.Http;
@@ -44,6 +45,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             container.Register<IValidationClient, HttpValidationClient>();
             container.Register<IAccessRequestClient, HttpAccessRequestClient>();
             container.Register<INeuronGraphQueryClient, HttpNeuronGraphQueryClient>();
+            container.Register<INotificationClient, HttpNotificationClient>();
 
             // data
             container.Register<IEventStoreUrlService>(
