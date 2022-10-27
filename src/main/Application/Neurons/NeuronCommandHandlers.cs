@@ -221,9 +221,6 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             {
                 TemplateType = NotificationTemplate.NeuronAccessRequested,
                 TemplateValues = new Dictionary<string, object>()
-                {
-                    { NotificationTemplateParameters.AvatarUrl, "https://www.example.com" }
-                }
             }, token);
         }
 
