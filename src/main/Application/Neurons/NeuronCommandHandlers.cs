@@ -16,7 +16,8 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         ICancellableCommandHandler<CreateNeuron>,
         ICancellableCommandHandler<ChangeNeuronTag>,
         ICancellableCommandHandler<ChangeNeuronExternalReferenceUrl>,
-        ICancellableCommandHandler<DeactivateNeuron>
+        ICancellableCommandHandler<DeactivateNeuron>,
+        ICancellableCommandHandler<ChangeNeuronRegionId>
     {
         private readonly INeuronAdapter neuronAdapter;
         private readonly IAuthoredEventStore eventStore;
@@ -166,6 +167,32 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             }
         }
 
+        public async Task Handle(ChangeNeuronRegionId message, CancellationToken token = default(CancellationToken))
+        {
+            AssertionConcern.AssertArgumentNotNull(message, nameof(message));
+
+            // validate
+            var validationResult = await this.validationClient.UpdateNeuron(
+                this.settingsService.IdentityAccessOutBaseUrl + "/",
+                message.Id,
+                message.UserId,
+                token);
+            if (!validationResult.HasErrors)
+            {
+                var txn = await Transaction.Begin(this.eventStore, this.inMemoryEventStore, message.Id, validationResult.UserNeuronId, message.ExpectedVersion);
+                await txn.InvokeAdapter(
+                        typeof(ei8.Data.Aggregate.Domain.Model.AggregateChanged).Assembly,
+                        async (ev) => await this.aggregateItemAdapter.ChangeAggregate(
+                            message.Id,
+                            message.NewRegionId,
+                            validationResult.UserNeuronId,
+                            ev
+                        ));
+
+                await txn.Commit();
+            }
+        } 
+
         public async Task Handle(DeactivateNeuron message, CancellationToken token = default(CancellationToken))
         {
             AssertionConcern.AssertArgumentNotNull(message, nameof(message));
@@ -193,3 +220,4 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         }
     }
 }
+
