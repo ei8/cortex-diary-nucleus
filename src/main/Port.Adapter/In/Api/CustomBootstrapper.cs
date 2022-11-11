@@ -2,6 +2,7 @@
 using CQRSlite.Domain;
 using CQRSlite.Routing;
 using ei8.Cortex.Diary.Nucleus.Application;
+using ei8.Cortex.Diary.Nucleus.Application.Access;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons;
 using ei8.Cortex.Diary.Nucleus.Application.Subscriptions;
 using ei8.Cortex.Diary.Nucleus.Port.Adapter.IO.Process.Services;
@@ -62,6 +63,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             container.Register<IRepository>((tic, npo) => new Repository(container.Resolve<IInMemoryAuthoredEventStore>()));
             container.Register<ISession, Session>();
             container.Register<ISubscriptionsClient, HttpSubscriptionsClient>();
+            container.Register<IAccessApplicationService, AccessApplicationService>();
             // neuron
             container.Register<INeuronAdapter, NeuronAdapter>();
             container.Register((tic, npo) => new neurUL.Cortex.Application.Neurons.NeuronCommandHandlers(container.Resolve<IInMemoryAuthoredEventStore>(), container.Resolve<ISession>()));

@@ -1,16 +1,10 @@
 ﻿using CQRSlite.Commands;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands;
-using ei8.Cortex.IdentityAccess.Client.In;
 using ei8.Cortex.IdentityAccess.Client.Out;
-using ei8.Cortex.Subscriptions.Client.In;
-using ei8.Cortex.Subscriptions.Common;
 using ei8.EventSourcing.Client;
-using ei8.EventSourcing.Client.Out;
 using neurUL.Common.Domain.Model;
 using neurUL.Cortex.Domain.Model.Neurons;
 using neurUL.Cortex.Port.Adapter.In.InProcess;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,8 +14,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         ICancellableCommandHandler<CreateNeuron>,
         ICancellableCommandHandler<ChangeNeuronTag>,
         ICancellableCommandHandler<ChangeNeuronExternalReferenceUrl>,
-        ICancellableCommandHandler<DeactivateNeuron>,
-        ICancellableCommandHandler<CreateNeuronAccessRequest>
+        ICancellableCommandHandler<DeactivateNeuron>
     {
         private readonly INeuronAdapter neuronAdapter;
         private readonly IAuthoredEventStore eventStore;
@@ -31,9 +24,6 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         private readonly ei8.Data.ExternalReference.Port.Adapter.In.InProcess.IItemAdapter externalReferenceAdapter;
         private readonly IValidationClient validationClient;
         private readonly ISettingsService settingsService;
-        private readonly IAccessRequestClient accessRequestClient;
-        private readonly INotificationClient notificationClient;
-        private readonly ISubscriptionsClient subscriptionsClient;
 
         public NeuronCommandHandlers(
             IAuthoredEventStore eventStore, 
@@ -43,10 +33,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             ei8.Data.Aggregate.Port.Adapter.In.InProcess.IItemAdapter aggregateItemAdapter,
             ei8.Data.ExternalReference.Port.Adapter.In.InProcess.IItemAdapter externalReferenceAdapter, 
             IValidationClient validationClient, 
-            ISettingsService settingsService,
-            IAccessRequestClient accessRequestClient,
-            INotificationClient notificationClient,
-            ISubscriptionsClient subscriptionsClient
+            ISettingsService settingsService
             )
         {
             AssertionConcern.AssertArgumentNotNull(neuronAdapter, nameof(neuronAdapter));
@@ -57,9 +44,6 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             AssertionConcern.AssertArgumentNotNull(externalReferenceAdapter, nameof(externalReferenceAdapter));
             AssertionConcern.AssertArgumentNotNull(validationClient, nameof(validationClient));
             AssertionConcern.AssertArgumentNotNull(settingsService, nameof(settingsService));
-            AssertionConcern.AssertArgumentNotNull(accessRequestClient, nameof(accessRequestClient));
-            AssertionConcern.AssertArgumentNotNull(notificationClient, nameof(notificationClient));
-            AssertionConcern.AssertArgumentNotNull(subscriptionsClient, nameof(subscriptionsClient));
 
             this.neuronAdapter = neuronAdapter;
             this.eventStore = (IAuthoredEventStore) eventStore;
@@ -69,9 +53,6 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             this.externalReferenceAdapter = externalReferenceAdapter;
             this.validationClient = validationClient;
             this.settingsService = settingsService;
-            this.accessRequestClient = accessRequestClient;
-            this.notificationClient = notificationClient;
-            this.subscriptionsClient = subscriptionsClient;
         }
 
         public async Task Handle(CreateNeuron message, CancellationToken token = default(CancellationToken))
@@ -207,29 +188,6 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
                 await txn.Commit();
             }
-        }
-
-        public async Task Handle(CreateNeuronAccessRequest message, CancellationToken token = default)
-        {
-            AssertionConcern.AssertArgumentNotNull(message, nameof(message));
-
-            await this.accessRequestClient.CreateAccessRequestAsync(this.settingsService.IdentityAccessInBaseUrl, message.NeuronId, message.UserNeuronId.ToString(), token);
-
-            var ownerUserId = await GetOwnerUserNeuronIdAsync(token);
-
-            await this.subscriptionsClient.SendNotificationToUser(this.settingsService.SubscriptionsInBaseUrl, ownerUserId, new NotificationPayloadRequest()
-            {
-                TemplateType = NotificationTemplate.NeuronAccessRequested,
-                TemplateValues = new Dictionary<string, object>()
-            }, token);
-        }
-
-        private async Task<string> GetOwnerUserNeuronIdAsync(CancellationToken token = default)
-        {
-            var ownerQueryResult = await this.notificationClient.GetNotificationLog(this.settingsService.EventSourcingOutBaseUrl + "/", "1,20", token);
-            var ownerUserId = ownerQueryResult.NotificationList.FirstOrDefault(nl => nl.Id == nl.AuthorId).AuthorId;
-
-            return ownerUserId;
         }
     }
 }
