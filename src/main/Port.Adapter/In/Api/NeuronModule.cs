@@ -9,8 +9,8 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 {
     public class NeuronModule : NancyModule
     {
-        internal static readonly Func<Exception, HttpStatusCode, HttpStatusCode> ConcurrencyExceptionSetter = new Func<Exception, HttpStatusCode, HttpStatusCode>((ex, hsc) => { 
-                            HttpStatusCode result = hsc;                   
+        internal static readonly Func<Exception, HttpStatusCode> ConcurrencyExceptionSetter = new Func<Exception, HttpStatusCode>((ex) => { 
+                            HttpStatusCode result = HttpStatusCode.BadRequest;             
                             if (ex is ConcurrencyException)
                                 result = HttpStatusCode.Conflict;                            
                             return result;
@@ -43,10 +43,10 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                                 )
                             );                            
                         },
-                        (ex, hsc) => { 
-						    // TODO: immediately cause calling Polly to fail (handle specific failure http code to signal "it's not worth retrying"?)
+                        (ex) => {
+                            // TODO: immediately cause calling Polly to fail (handle specific failure http code to signal "it's not worth retrying"?)
                             // i.e. there is an issue with the data
-                            HttpStatusCode result = hsc;                   
+                            HttpStatusCode result = HttpStatusCode.BadRequest;           
                             if (ex is ConcurrencyException)
                                 result = HttpStatusCode.Conflict;                            
                             return result;
@@ -72,6 +72,13 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                                     bodyAsObject.UserId.ToString(),
                                     expectedVersion
                                     );
+                            else if (bodyAsDictionary.ContainsKey("RegionId"))
+                                result = new ChangeNeuronRegionId(
+                                    Guid.Parse(parameters.neuronId),
+                                    bodyAsObject.RegionId == null ? null : bodyAsObject.RegionId.ToString(),
+                                    bodyAsObject.UserId.ToString(),
+                                    expectedVersion
+                                    );
                             else if (bodyAsDictionary.ContainsKey("ExternalReferenceUrl"))
                                 result = new ChangeNeuronExternalReferenceUrl(
                                     Guid.Parse(parameters.neuronId),
@@ -82,7 +89,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                             await commandSender.Send(result);
                         },
                         ConcurrencyExceptionSetter,
-                        new string[] { "Tag", "ExternalReferenceUrl" },
+                        new string[] { "Tag", "RegionId", "ExternalReferenceUrl" },
                         "UserId"
                     );
             }
