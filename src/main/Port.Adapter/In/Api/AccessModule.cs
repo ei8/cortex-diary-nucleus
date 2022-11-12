@@ -7,7 +7,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 {
     public class AccessModule : NancyModule
     {
-        internal static readonly Func<Exception, HttpStatusCode, HttpStatusCode> ExceptionSetter = new Func<Exception, HttpStatusCode, HttpStatusCode>((ex, hsc) => hsc);
+        internal static readonly Func<Exception, HttpStatusCode> ExceptionSetter = new Func<Exception, HttpStatusCode>(ex => HttpStatusCode.InternalServerError);
 
         public AccessModule(IAccessApplicationService accessApplicationService) : base("/nuclei/d23/access")
         {
