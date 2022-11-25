@@ -2,14 +2,16 @@
 using CQRSlite.Domain;
 using CQRSlite.Routing;
 using ei8.Cortex.Diary.Nucleus.Application;
+using ei8.Cortex.Diary.Nucleus.Application.Access;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons;
 using ei8.Cortex.Diary.Nucleus.Application.Subscriptions;
 using ei8.Cortex.Diary.Nucleus.Port.Adapter.IO.Process.Services;
 using ei8.Cortex.Graph.Client;
+using ei8.Cortex.IdentityAccess.Client.In;
 using ei8.Cortex.IdentityAccess.Client.Out;
 using ei8.Cortex.Subscriptions.Client.In;
-using ei8.Cortex.Subscriptions.Common.Receivers;
 using ei8.EventSourcing.Client;
+using ei8.EventSourcing.Client.Out;
 using Nancy;
 using Nancy.TinyIoc;
 using neurUL.Common.Http;
@@ -42,7 +44,9 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                 });
             container.Register<ISettingsService, SettingsService>();
             container.Register<IValidationClient, HttpValidationClient>();
+            container.Register<IAccessRequestClient, HttpAccessRequestClient>();
             container.Register<INeuronGraphQueryClient, HttpNeuronGraphQueryClient>();
+            container.Register<INotificationClient, HttpNotificationClient>();
 
             // data
             container.Register<IEventStoreUrlService>(
@@ -59,6 +63,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             container.Register<IRepository>((tic, npo) => new Repository(container.Resolve<IInMemoryAuthoredEventStore>()));
             container.Register<ISession, Session>();
             container.Register<ISubscriptionsClient, HttpSubscriptionsClient>();
+            container.Register<IAccessApplicationService, AccessApplicationService>();
             // neuron
             container.Register<INeuronAdapter, NeuronAdapter>();
             container.Register((tic, npo) => new neurUL.Cortex.Application.Neurons.NeuronCommandHandlers(container.Resolve<IInMemoryAuthoredEventStore>(), container.Resolve<ISession>()));

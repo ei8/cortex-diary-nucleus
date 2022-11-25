@@ -1,12 +1,10 @@
-﻿using CQRSlite.Commands;
-using CQRSlite.Events;
+using CQRSlite.Commands;
 using ei8.Cortex.Diary.Nucleus.Application.Neurons.Commands;
 using ei8.Cortex.IdentityAccess.Client.Out;
 using ei8.EventSourcing.Client;
 using neurUL.Common.Domain.Model;
 using neurUL.Cortex.Domain.Model.Neurons;
 using neurUL.Cortex.Port.Adapter.In.InProcess;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
