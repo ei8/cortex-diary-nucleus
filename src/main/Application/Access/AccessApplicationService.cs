@@ -1,4 +1,5 @@
 ﻿using ei8.Cortex.IdentityAccess.Client.In;
+using ei8.Cortex.IdentityAccess.Client.Out;
 using ei8.Cortex.Subscriptions.Client.In;
 using ei8.Cortex.Subscriptions.Common;
 using ei8.EventSourcing.Client.Out;
@@ -17,24 +18,39 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Access
         private readonly ISettingsService settingsService;
         private readonly ISubscriptionsClient subscriptionsClient;
         private readonly INotificationClient notificationClient;
+        private readonly IAuthorClient authorClient;
 
-        public AccessApplicationService(IAccessRequestClient accessRequestClient,
+        public AccessApplicationService(
+            IAccessRequestClient accessRequestClient,
             ISettingsService settingsService,
             ISubscriptionsClient subscriptionsClient,
-            INotificationClient notificationClient)
+            INotificationClient notificationClient,
+            IAuthorClient authorClient)
         {
             this.accessRequestClient = accessRequestClient;
             this.settingsService = settingsService;
             this.subscriptionsClient = subscriptionsClient;
             this.notificationClient = notificationClient;
+            this.authorClient = authorClient;
         }
 
-        public async Task CreateNeuronAccessRequest(Guid neuronId, Guid userNeuronId, CancellationToken token = default)
+        public async Task CreateNeuronAccessRequest(Guid neuronId, Guid userId, CancellationToken token = default)
         {
             AssertionConcern.AssertArgumentNotNull(neuronId, nameof(neuronId));
-            AssertionConcern.AssertArgumentNotNull(userNeuronId, nameof(userNeuronId));
+            AssertionConcern.AssertArgumentNotNull(userId, nameof(userId));
 
-            await this.accessRequestClient.CreateAccessRequestAsync(this.settingsService.IdentityAccessInBaseUrl, neuronId, userNeuronId.ToString(), token);
+            var author = await this.authorClient.GetAuthor(
+                this.settingsService.IdentityAccessOutBaseUrl + "/", 
+                userId.ToString(), 
+                token
+                );
+
+            await this.accessRequestClient.CreateAccessRequestAsync(
+                this.settingsService.IdentityAccessInBaseUrl + "/", 
+                neuronId, 
+                author.UserNeuronId.ToString(), 
+                token
+                );
 
             var ownerUserId = await GetOwnerUserNeuronIdAsync(token);
 

@@ -47,6 +47,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             container.Register<IAccessRequestClient, HttpAccessRequestClient>();
             container.Register<INeuronGraphQueryClient, HttpNeuronGraphQueryClient>();
             container.Register<INotificationClient, HttpNotificationClient>();
+            container.Register<IAuthorClient, HttpAuthorClient>();
 
             // data
             container.Register<IEventStoreUrlService>(

@@ -8,6 +8,6 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Access
 {
     public interface IAccessApplicationService
     {
-        Task CreateNeuronAccessRequest(Guid neuronId, Guid userNeuronId, CancellationToken token = default);
+        Task CreateNeuronAccessRequest(Guid neuronId, Guid userId, CancellationToken token = default);
     }
 }
