@@ -12,6 +12,8 @@ using ei8.Cortex.IdentityAccess.Client.Out;
 using ei8.Cortex.Subscriptions.Client.In;
 using ei8.EventSourcing.Client;
 using ei8.EventSourcing.Client.Out;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Nancy;
 using Nancy.TinyIoc;
 using neurUL.Common.Http;
@@ -23,13 +25,18 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 {
     public class CustomBootstrapper : DefaultNancyBootstrapper
     {
-        public CustomBootstrapper()
+        private readonly IServiceProvider serviceProvider;
+        
+        public CustomBootstrapper(IServiceProvider serviceProvider)
         {
+            this.serviceProvider = serviceProvider;
         }
 
         protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
         {
             base.ConfigureRequestContainer(container, context);
+
+            container.Register(this.serviceProvider.GetService<IHttpClientFactory>());
 
             // create a singleton instance which will be reused for all calls in current request
             var ipb = new Router();
@@ -63,6 +70,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             container.Register<IInMemoryAuthoredEventStore, InMemoryEventStore>();
             container.Register<IRepository>((tic, npo) => new Repository(container.Resolve<IInMemoryAuthoredEventStore>()));
             container.Register<ISession, Session>();
+            container.Register<ITransaction, Transaction>();
             container.Register<ISubscriptionsClient, HttpSubscriptionsClient>();
             container.Register<IAccessApplicationService, AccessApplicationService>();
             // neuron

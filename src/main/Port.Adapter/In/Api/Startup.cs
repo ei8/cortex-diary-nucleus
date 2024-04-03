@@ -13,11 +13,12 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
             {
                 options.AllowSynchronousIO = true;
             });
+            services.AddHttpClient();
         }
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseOwin(buildFunc => buildFunc.UseNancy());
+            app.UseOwin(buildFunc => buildFunc.UseNancy(o => o.Bootstrapper = new CustomBootstrapper(app.ApplicationServices)));
         }
     }
 }

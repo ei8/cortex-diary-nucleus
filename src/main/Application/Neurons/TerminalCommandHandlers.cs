@@ -19,8 +19,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         ICancellableCommandHandler<CreateTerminal>,
         ICancellableCommandHandler<DeactivateTerminal>
     {
-        private readonly IAuthoredEventStore eventStore;
-        private readonly IInMemoryAuthoredEventStore inMemoryEventStore;
+        private readonly ITransaction transaction;
         private readonly ITerminalAdapter terminalAdapter;
         private readonly ei8.Data.ExternalReference.Port.Adapter.In.InProcess.IItemAdapter externalReferenceAdapter;
         private readonly IValidationClient validationClient;
@@ -28,8 +27,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
         private readonly ISettingsService settingsService;
 
         public TerminalCommandHandlers(
-            IAuthoredEventStore eventStore, 
-            IInMemoryAuthoredEventStore inMemoryEventStore, 
+            ITransaction transaction,
             ITerminalAdapter terminalAdapter,
             ei8.Data.ExternalReference.Port.Adapter.In.InProcess.IItemAdapter externalReferenceAdapter, 
             IValidationClient validationClient, 
@@ -37,16 +35,14 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             ISettingsService settingsService
             )
         {
-            AssertionConcern.AssertArgumentNotNull(eventStore, nameof(eventStore));
-            AssertionConcern.AssertArgumentNotNull(inMemoryEventStore, nameof(inMemoryEventStore));
+            AssertionConcern.AssertArgumentNotNull(transaction, nameof(transaction));
             AssertionConcern.AssertArgumentNotNull(terminalAdapter, nameof(terminalAdapter));
             AssertionConcern.AssertArgumentNotNull(externalReferenceAdapter, nameof(externalReferenceAdapter));
             AssertionConcern.AssertArgumentNotNull(validationClient, nameof(validationClient));
             AssertionConcern.AssertArgumentNotNull(neuronGraphQueryClient, nameof(neuronGraphQueryClient));
             AssertionConcern.AssertArgumentNotNull(settingsService, nameof(settingsService));
 
-            this.eventStore = (IAuthoredEventStore)eventStore;
-            this.inMemoryEventStore = (IInMemoryAuthoredEventStore)inMemoryEventStore; 
+            this.transaction = transaction;
             this.terminalAdapter = terminalAdapter;
             this.externalReferenceAdapter = externalReferenceAdapter;
             this.validationClient = validationClient;
@@ -67,11 +63,11 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
             if (!validationResult.HasErrors)
             {
-                var txn = await Transaction.Begin(this.eventStore, this.inMemoryEventStore, message.Id, validationResult.UserNeuronId);
+                await this.transaction.BeginAsync(message.Id, validationResult.UserNeuronId);
 
-                var otherAggregateEvents = await (new Guid[] { message.PresynapticNeuronId, message.PostsynapticNeuronId }).SelectManyAsync(g => this.eventStore.Get(g, -1));
-                await txn.InvokeAdapter(
-                    typeof(TerminalCreated).Assembly,
+                var expectedVersion = await this.transaction.InvokeAdapterAsync(
+                    message.Id,
+                    typeof(TerminalCreated).Assembly.GetEventTypes(),
                     async (ev) => await this.terminalAdapter.CreateTerminal(
                         message.Id,
                         message.PresynapticNeuronId,
@@ -79,22 +75,23 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                         message.Effect,
                         message.Strength,
                         validationResult.UserNeuronId
-                    ),
-                    Transaction.ReplaceUnrecognizedEvents(otherAggregateEvents, typeof(NeuronCreated).Assembly)
-                    );
+                    ));
 
                 if (!string.IsNullOrWhiteSpace(message.ExternalReferenceUrl))
                 {
-                    await txn.InvokeAdapter(
-                        typeof(ei8.Data.ExternalReference.Domain.Model.UrlChanged).Assembly,
+                    expectedVersion = await this.transaction.InvokeAdapterAsync(
+                        message.Id,
+                        typeof(ei8.Data.ExternalReference.Domain.Model.UrlChanged).Assembly.GetEventTypes(),
                         async (ev) => await this.externalReferenceAdapter.ChangeUrl(
                             message.Id,
                             message.ExternalReferenceUrl,
                             validationResult.UserNeuronId,
                             ev
-                        ));
+                        ),
+                        expectedVersion
+                        );
                 }
-                await txn.Commit();
+                await this.transaction.CommitAsync();
             }
         }
 
@@ -121,16 +118,19 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
             if (!validationResult.HasErrors)
             {
-                var txn = await Transaction.Begin(this.eventStore, this.inMemoryEventStore, message.Id, validationResult.UserNeuronId, message.ExpectedVersion);
-                await txn.InvokeAdapter(
-                    typeof(TerminalDeactivated).Assembly,
+                await this.transaction.BeginAsync(message.Id, validationResult.UserNeuronId);
+                await this.transaction.InvokeAdapterAsync(
+                    message.Id,
+                    typeof(TerminalDeactivated).Assembly.GetEventTypes(),
                     async (ev) => await this.terminalAdapter.DeactivateTerminal(
                         message.Id,
                         validationResult.UserNeuronId,
                         ev
-                    ));
+                    ),
+                    message.ExpectedVersion
+                    );
 
-                await txn.Commit();
+                await this.transaction.CommitAsync();
             }
         }
     }
