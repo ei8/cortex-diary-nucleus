@@ -63,7 +63,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
             if (!validationResult.HasErrors)
             {
-                await this.transaction.BeginAsync(message.Id, validationResult.UserNeuronId);
+                await this.transaction.BeginAsync(validationResult.UserNeuronId);
 
                 var expectedVersion = await this.transaction.InvokeAdapterAsync(
                     message.Id,
@@ -118,7 +118,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
             if (!validationResult.HasErrors)
             {
-                await this.transaction.BeginAsync(message.Id, validationResult.UserNeuronId);
+                await this.transaction.BeginAsync(validationResult.UserNeuronId);
                 await this.transaction.InvokeAdapterAsync(
                     message.Id,
                     typeof(TerminalDeactivated).Assembly.GetEventTypes(),

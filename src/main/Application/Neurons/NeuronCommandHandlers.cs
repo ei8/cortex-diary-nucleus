@@ -68,7 +68,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
             if (!validationResult.HasErrors)
             {
                 //TODO: transfer all of this to domain.model.IRepository, especially parse of Guid for region/aggregate
-                await this.transaction.BeginAsync(message.Id, validationResult.UserNeuronId);
+                await this.transaction.BeginAsync(validationResult.UserNeuronId);
                 int expectedVersion = await this.transaction.InvokeAdapterAsync(
                     message.Id,
                     typeof(NeuronCreated).Assembly.GetEventTypes(),
@@ -132,7 +132,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
             if (!validationResult.HasErrors)
             {
-                await this.transaction.BeginAsync(message.Id, validationResult.UserNeuronId);
+                await this.transaction.BeginAsync(validationResult.UserNeuronId);
                 await this.transaction.InvokeAdapterAsync(
                     message.Id,
                     typeof(ei8.Data.Tag.Domain.Model.TagChanged).Assembly.GetEventTypes(),
@@ -161,7 +161,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
             if (!validationResult.HasErrors)
             {
-                await this.transaction.BeginAsync(message.Id, validationResult.UserNeuronId);
+                await this.transaction.BeginAsync(validationResult.UserNeuronId);
                 await this.transaction.InvokeAdapterAsync(
                     message.Id,
                     typeof(ei8.Data.ExternalReference.Domain.Model.UrlChanged).Assembly.GetEventTypes(),
@@ -190,7 +190,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
                 token);
             if (!validationResult.HasErrors)
             {
-                await this.transaction.BeginAsync(message.Id, validationResult.UserNeuronId);
+                await this.transaction.BeginAsync(validationResult.UserNeuronId);
                 await this.transaction.InvokeAdapterAsync(
                     message.Id,
                     typeof(ei8.Data.Aggregate.Domain.Model.AggregateChanged).Assembly.GetEventTypes(),
@@ -220,7 +220,7 @@ namespace ei8.Cortex.Diary.Nucleus.Application.Neurons
 
             if (!validationResult.HasErrors)
             {
-                await this.transaction.BeginAsync(message.Id, validationResult.UserNeuronId);
+                await this.transaction.BeginAsync(validationResult.UserNeuronId);
                 await this.transaction.InvokeAdapterAsync(
                     message.Id,
                     typeof(NeuronCreated).Assembly.GetEventTypes(),
