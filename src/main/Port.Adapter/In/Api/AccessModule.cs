@@ -9,7 +9,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
     {
         internal static readonly Func<Exception, HttpStatusCode> ExceptionSetter = new Func<Exception, HttpStatusCode>(ex => HttpStatusCode.InternalServerError);
 
-        public AccessModule(IAccessApplicationService accessApplicationService) : base("/nuclei/d23/access")
+        public AccessModule(IAccessApplicationService accessApplicationService) : base("/nuclei/un8y/access")
         {
             this.Post("/neuron/{neuronId}", async (parameters) =>
             {

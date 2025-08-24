@@ -15,7 +15,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
                                 result = HttpStatusCode.Conflict;                            
                             return result;
                         });
-        public NeuronModule(ICommandSender commandSender) : base("/nuclei/d23/neurons")
+        public NeuronModule(ICommandSender commandSender) : base("/nuclei/un8y/neurons")
         {
             this.Post(string.Empty, async (parameters) =>
             {

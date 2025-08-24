@@ -7,7 +7,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.Out.Api
 {
     public class SubscriptionsModule : NancyModule
     {
-        public SubscriptionsModule(ISubscriptionConfigurationQueryService service) : base("/nuclei/d23/subscriptions")
+        public SubscriptionsModule(ISubscriptionConfigurationQueryService service) : base("/nuclei/un8y/subscriptions")
         {
             this.Get("/config", async (parameters) =>
             {

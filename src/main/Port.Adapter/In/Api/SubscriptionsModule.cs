@@ -11,7 +11,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 {
     public class SubscriptionsModule : NancyModule
     {
-        public SubscriptionsModule(ICommandSender commandSender) : base("/nuclei/d23/subscriptions")
+        public SubscriptionsModule(ICommandSender commandSender) : base("/nuclei/un8y/subscriptions")
         {
             this.Post("/receivers/{receiverType}", async (parameters) =>
             {

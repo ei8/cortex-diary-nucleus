@@ -156,10 +156,6 @@
       <Project>{a70fbf47-1b05-4ccf-85eb-afb0906d551a}</Project>
       <Name>Domain.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Domain.Model\Domain.Model.Test.csproj">
-      <Project>{ab2e896f-268e-417d-85f5-9d554aa11d67}</Project>
-      <Name>Domain.Model.Test</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

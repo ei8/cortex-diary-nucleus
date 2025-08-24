@@ -12,7 +12,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api
 {
     public class TerminalModule : NancyModule
     {
-        public TerminalModule(ICommandSender commandSender) : base("/nuclei/d23/terminals")
+        public TerminalModule(ICommandSender commandSender) : base("/nuclei/un8y/terminals")
         {
             this.Post(string.Empty, async (parameters) =>
             {

@@ -11,7 +11,7 @@ namespace ei8.Cortex.Diary.Nucleus.Port.Adapter.Out.Api
 {
     public class NotificationModule : NancyModule
     {
-        public NotificationModule(INotificationApplicationService notificationService) : base("/nuclei/d23/notifications")
+        public NotificationModule(INotificationApplicationService notificationService) : base("/nuclei/un8y/notifications")
         {
             this.Get("/", async (parameters) => new TextResponse(JsonConvert.SerializeObject(
                 await notificationService.GetNotificationLog(string.Empty)
